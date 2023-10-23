@@ -1,0 +1,489 @@
+openapi: 3.0.3
+info:
+  title: OTA backend - OpenAPI 3.0
+  description: OTA backend
+  version: 1.0.0
+servers:
+  - url: localhost:8080
+tags:
+  - name: devices
+    description: devices
+  - name: tags
+    description: tags
+  - name: firmware
+    description: firmware
+  - name: users
+    description: users
+paths:
+  /api/v1/devices:
+    post:
+      tags:
+        - devices
+      summary: Creates a new device
+      operationId: createDevice
+      requestBody:
+        $ref: '#/components/requestBodies/CreateDeviceRequestBody'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateDeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    get:
+      tags:
+        - devices
+      summary: List of devices
+      operationId: devices
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: pageSize
+          schema:
+            type: number
+      responses:
+        '200':
+          $ref: '#/components/responses/DevicePageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+  /api/v1/devices/{id}:
+    put:
+      tags:
+        - devices
+      summary: Update existing device by given id
+      operationId: updateDevice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateDeviceRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateDeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    get:
+      tags:
+        - devices
+      summary: Receive existing device by given id
+      operationId: getDeviceById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/GetDeviceByIdResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    delete:
+      tags:
+        - devices
+      summary: Delete existing device by given id
+      operationId: deleteDevice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully deleted device
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+  /api/v1/tags:
+    post:
+      tags:
+        - tags
+      summary: Creates a new tag
+      operationId: createTag
+      requestBody:
+        $ref: '#/components/requestBodies/CreateTagRequestBody'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateTagResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    get:
+      tags:
+        - tags
+      summary: List of tags
+      operationId: tags
+      responses:
+        '200':
+          $ref: '#/components/responses/TagsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+  /api/v1/tags/{id}:
+    put:
+      tags:
+        - tags
+      summary: Update existing tag by given id
+      operationId: updateTag
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateTagRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateTagResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    get:
+      tags:
+        - tags
+      summary: Receive existing tag by given id
+      operationId: getTagById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTagByIdResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    delete:
+      tags:
+        - tags
+      summary: Delete existing tag by given id
+      operationId: deleteTag
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully deleted tag
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+  /api/v1/firmware:
+    post:
+      tags:
+        - firmware
+      summary: Uploads a new firmware
+      operationId: uploadFirmware
+      requestBody:
+        $ref: '#/components/requestBodies/UploadFirmwareRequestBody'
+      responses:
+        '201':
+          description: Successfully uploaded firmware
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+  /api/v1/firmware/{id}:
+    get:
+      tags:
+        - firmware
+      summary: Downloads existing firmware by given id
+      operationId: downloadFirmware
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/DownloadFirmwareResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+    delete:
+      tags:
+        - firmware
+      summary: Delete existing firmware by given id
+      operationId: deleteFirmware
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully deleted firmware
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+  /api/v1/firmware/{id}/info:
+    get:
+      tags:
+        - firmware
+      summary: Receives existing firmware info by given id
+      operationId: getFirmwareInfoById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/DownloadFirmwareResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestExceptionResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenExceptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundExceptionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerExceptionResponse'
+
+components:
+  schemas:
+    CreateDevice:
+      type: object
+    UpdateDevice:
+      type: object
+    Device:
+      type: object
+    DevicePage:
+      type: object
+      properties:
+        pageCount:
+          type: number
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+    CreateTag:
+      type: object
+    UpdateTag:
+      type: object
+      properties:
+        name:
+          type: string
+    Tag:
+      type: object
+    UploadFirmware:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+    FirmwareInfo:
+      type: object
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: number
+        message:
+          type: string
+
+  requestBodies:
+    CreateDeviceRequestBody:
+      description: Object that describes a creation of a new device
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateDevice'
+    UpdateDeviceRequestBody:
+      description: Object that describes an update of a existing device
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateDevice'
+    CreateTagRequestBody:
+      description: Object that describes a creation of a new tag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateTag'
+    UpdateTagRequestBody:
+      description: Object that describes an update of a existing tag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateTag'
+    UploadFirmwareRequestBody:
+      description: Object that describes an upload of a firmware
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/UploadFirmware'
+
+  responses:
+    CreateDeviceResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Device'
+    DevicePageResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DevicePage'
+    UpdateDeviceResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Device'
+    GetDeviceByIdResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Device'
+    CreateTagResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tag'
+    TagsResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Tag'
+    UpdateTagResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tag'
+    GetTagByIdResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tag'
+    DownloadFirmwareResponse:
+      description:
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    GetFirmwareInfoByIdResponse:
+      description:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FirmwareInfo'
+    BadRequestExceptionResponse:
+      description: Failure when request was not correct
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ForbiddenExceptionResponse:
+      description: Failure user cannot be authorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFoundExceptionResponse:
+      description: Failure when object cannot be found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerExceptionResponse:
+      description: Failure by internal server exceptions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
