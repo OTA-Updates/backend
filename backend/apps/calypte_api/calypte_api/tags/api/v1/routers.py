@@ -18,7 +18,7 @@ router = APIRouter()
     status_code=201,
 )
 async def create_tag(
-    create_tag_request_body: tags_schemas.CreateTagRequestBody
+    create_tag_request_body: tags_schemas.CreateTagRequestBody,
 ) -> tags_schemas.CreateTagResponse:
     ...
 

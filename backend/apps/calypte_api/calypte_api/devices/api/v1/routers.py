@@ -18,7 +18,7 @@ router = APIRouter()
     status_code=201,
 )
 async def create_device(
-    create_device_request_body: device_schemas.CreateDeviceRequestBody
+    create_device_request_body: device_schemas.CreateDeviceRequestBody,
 ) -> device_schemas.CreateDeviceResponse:
     ...
 
