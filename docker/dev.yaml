@@ -30,18 +30,18 @@ services:
       timeout: 5s
       retries: 10
 
-  lotaDB:
+  calypteDB:
     image: postgres:15.3
-    container_name: films_db
+    container_name: 
     restart: unless-stopped
     environment:
-      POSTGRES_USER: lota
-      POSTGRES_PASSWORD: lota
-      POSTGRES_DB: lota_db
+      POSTGRES_USER: calypte
+      POSTGRES_PASSWORD: calypte
+      POSTGRES_DB: calypte_db
     ports:
       - "5432:5432"
     volumes:
-      - lota_db:/var/lib/postgresql/data
+      - calypte_db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U films -d films_db"]
       interval: 5s
@@ -62,4 +62,4 @@ services:
 
 volumes:
   auth_db:
-  lota_db:
+  calypte_db:
