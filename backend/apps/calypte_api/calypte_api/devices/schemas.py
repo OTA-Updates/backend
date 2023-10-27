@@ -10,7 +10,8 @@ class BaseDeviceRequestSchema(BaseModel):
 
 
 class GetDeviceQueryParams(BaseDeviceRequestSchema, Params):
-    name: str | None = Field(alias="name", default=None)
+    name: str | None = Field(default=None)
+    # TODO: figure out how to define a list in query params
     # tags: list[UUID] | None = Field(alias="tags")
 
 
