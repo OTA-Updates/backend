@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from calypte_api.common import databases
 from calypte_api.common.settings import get_settings
 from calypte_api.devices.api.v1.routers import router as devices_router
 from calypte_api.firmware.api.v1.routers import router as firmware_router
@@ -10,6 +11,11 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi_pagination import add_pagination
+from redis import asyncio as aioredis
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
+    create_async_engine,
+)
 
 
 settings = get_settings()
@@ -17,7 +23,21 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    databases.engine = create_async_engine(
+        settings.postgres_dsn(), echo=settings.debug, future=True
+    )
+    databases.async_session = async_sessionmaker(
+        databases.engine, expire_on_commit=False
+    )
+    databases.redis = aioredis.from_url(settings.redis_dsn(), encoding="utf-8")
+
     yield
+
+    if databases.engine:
+        await databases.engine.dispose()
+
+    if databases.redis:
+        await databases.redis.close()
 
 
 app = FastAPI(
@@ -31,9 +51,9 @@ app = FastAPI(
 )
 
 
-app.include_router(devices_router, prefix="/api/v1")
-app.include_router(firmware_router, prefix="/api/v1")
-app.include_router(tags_router, prefix="/api/v1")
+app.include_router(devices_router, prefix="/api/v1", tags=["devices"])
+app.include_router(firmware_router, prefix="/api/v1", tags=["firmware"])
+app.include_router(tags_router, prefix="/api/v1", tags=["tags"])
 
 add_pagination(app)
 
