@@ -157,4 +157,4 @@ def get_device_repo(db_session: DBSessionType) -> IDeviceRepo:
     return DeviceRepo(db_session=db_session)
 
 
-RepositoryType = Annotated[IDeviceRepo, Depends(get_device_repo)]
+DeviceRepositoryType = Annotated[IDeviceRepo, Depends(get_device_repo)]

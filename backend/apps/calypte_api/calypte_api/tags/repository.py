@@ -147,4 +147,4 @@ def get_tag_repo(db_session: DBSessionType) -> ITagRepo:
     return TagRepo(db_session=db_session)
 
 
-RepositoryType = Annotated[ITagRepo, Depends(get_tag_repo)]
+TagRepositoryType = Annotated[ITagRepo, Depends(get_tag_repo)]
