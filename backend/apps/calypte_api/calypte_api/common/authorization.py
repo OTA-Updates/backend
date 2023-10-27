@@ -31,11 +31,9 @@ def decode_token(token: str) -> JwtClaims | None:
             settings.jwt_secret_key,
             algorithms=[settings.jwt_encoding_algorithm],
         )
-        print(decoded_token)
         jwt_claims = JwtClaims(**decoded_token)
         return jwt_claims if jwt_claims.exp >= time.time() else None
     except Exception:
-        print("Exception")
         return None
 
 
