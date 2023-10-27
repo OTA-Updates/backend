@@ -1,22 +1,31 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from fastapi_pagination import Params
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class BaseTagSchema(BaseModel):
+class BaseTagRequestSchema(BaseModel):
     ...
 
 
-class CreateTagRequestBody(BaseTagSchema):
+class GetTagQueryParams(BaseTagRequestSchema, Params):
+    name: str | None = Field(default=None)
+
+
+class CreateTagRequestBody(BaseTagRequestSchema):
     name: str
 
 
-class UpdateTagRequestBody(BaseTagSchema):
+class UpdateTagRequestBody(BaseTagRequestSchema):
     name: str
 
 
-class CreateTagResponse(BaseTagSchema):
+class BaseTagResponseSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class CreateTagResponse(BaseTagResponseSchema):
     id: UUID
     name: str
 
@@ -24,7 +33,7 @@ class CreateTagResponse(BaseTagSchema):
     updated_at: datetime = Field(alias="updatedAt")
 
 
-class UpdateTagResponse(BaseTagSchema):
+class UpdateTagResponse(BaseTagResponseSchema):
     id: UUID
     name: str
 
@@ -32,7 +41,7 @@ class UpdateTagResponse(BaseTagSchema):
     updated_at: datetime = Field(alias="updatedAt")
 
 
-class GetTagResponse(BaseTagSchema):
+class GetTagResponse(BaseTagResponseSchema):
     id: UUID
     name: str
 
