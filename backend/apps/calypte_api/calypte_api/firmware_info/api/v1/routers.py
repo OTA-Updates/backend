@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from calypte_api.common.dependencies import JwtClaims, check_permission
+from calypte_api.common.dependencies import JwtClaims, RateLimiterType, check_permission
 from calypte_api.common.user_roles import UserRole
 from calypte_api.firmware_info import schemas as firmware_schemas
 from calypte_api.firmware_info.service import FirmwareInfoServiceType
@@ -21,6 +21,7 @@ router = APIRouter()
     status_code=200,
 )
 async def retrieve_firmware_list(
+    _: RateLimiterType,
     firmware_info_service: FirmwareInfoServiceType,
     query_params: firmware_schemas.GetFirmwareInfoQueryParams = Depends(
         firmware_schemas.GetFirmwareInfoQueryParams
@@ -42,6 +43,7 @@ async def retrieve_firmware_list(
     status_code=200,
 )
 async def retrieve_firmware_info(
+    _: RateLimiterType,
     firmware_id: UUID,
     firmware_info_service: FirmwareInfoServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
@@ -61,6 +63,7 @@ async def retrieve_firmware_info(
     status_code=200,
 )
 async def update_firmware_info(
+    _: RateLimiterType,
     firmware_id: UUID,
     update_request_body: firmware_schemas.FirmwareInfoUpdateRequestBody,
     firmware_info_service: FirmwareInfoServiceType,

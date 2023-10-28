@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from calypte_api.common.dependencies import JwtClaims, check_permission
+from calypte_api.common.dependencies import JwtClaims, RateLimiterType, check_permission
 from calypte_api.common.user_roles import UserRole
 from calypte_api.devices import schemas as device_schemas
 from calypte_api.devices.service import DeviceServiceType
@@ -21,6 +21,7 @@ router = APIRouter()
     status_code=201,
 )
 async def create_device(
+    _: RateLimiterType,
     create_device_request_body: device_schemas.CreateDeviceRequestBody,
     device_service: DeviceServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
@@ -40,6 +41,7 @@ async def create_device(
     status_code=200,
 )
 async def retrieve_devices(
+    _: RateLimiterType,
     device_service: DeviceServiceType,
     query_params: device_schemas.GetDeviceQueryParams = Depends(
         device_schemas.GetDeviceQueryParams
@@ -61,6 +63,7 @@ async def retrieve_devices(
     status_code=200,
 )
 async def retrieve_device(
+    _: RateLimiterType,
     device_id: UUID,
     device_service: DeviceServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
@@ -80,6 +83,7 @@ async def retrieve_device(
     status_code=200,
 )
 async def update_device(
+    _: RateLimiterType,
     device_id: UUID,
     update_device_request_body: device_schemas.UpdateDeviceRequestBody,
     device_service: DeviceServiceType,
@@ -100,6 +104,7 @@ async def update_device(
     status_code=204,
 )
 async def delete_device(
+    _: RateLimiterType,
     device_id: UUID,
     device_service: DeviceServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),

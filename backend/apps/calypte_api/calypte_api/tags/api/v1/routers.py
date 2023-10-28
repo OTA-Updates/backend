@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from calypte_api.common.dependencies import JwtClaims, check_permission
+from calypte_api.common.dependencies import JwtClaims, RateLimiterType, check_permission
 from calypte_api.common.user_roles import UserRole
 from calypte_api.tags import schemas as tags_schemas
 from calypte_api.tags.service import TagServiceType
@@ -21,6 +21,7 @@ router = APIRouter()
     status_code=201,
 )
 async def create_tag(
+    _: RateLimiterType,
     create_tag_request_body: tags_schemas.CreateTagRequestBody,
     tag_service: TagServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
@@ -40,6 +41,7 @@ async def create_tag(
     status_code=200,
 )
 async def get_tags_page(
+    _: RateLimiterType,
     tag_service: TagServiceType,
     query_params: tags_schemas.GetTagQueryParams = Depends(
         tags_schemas.GetTagQueryParams
@@ -61,6 +63,7 @@ async def get_tags_page(
     status_code=200,
 )
 async def get_tag(
+    _: RateLimiterType,
     tag_id: UUID,
     tag_service: TagServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
@@ -80,6 +83,7 @@ async def get_tag(
     status_code=200,
 )
 async def update_tag(
+    _: RateLimiterType,
     tag_id: UUID,
     update_tag_request_body: tags_schemas.UpdateTagRequestBody,
     tag_service: TagServiceType,
@@ -101,6 +105,7 @@ async def update_tag(
     status_code=204,
 )
 async def delete_tag(
+    _: RateLimiterType,
     tag_id: UUID,
     tag_service: TagServiceType,
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
