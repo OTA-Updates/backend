@@ -4,6 +4,7 @@ from calypte_api.common import databases
 from calypte_api.common.settings import get_settings
 from calypte_api.devices.api.v1.routers import router as devices_router
 from calypte_api.firmware.api.v1.routers import router as firmware_router
+from calypte_api.firmware_info.api.v1.routers import router as firmware_info_router
 from calypte_api.tags.api.v1.routers import router as tags_router
 
 import uvicorn
@@ -54,6 +55,7 @@ app = FastAPI(
 app.include_router(devices_router, prefix="/api/v1", tags=["devices"])
 app.include_router(firmware_router, prefix="/api/v1", tags=["firmware"])
 app.include_router(tags_router, prefix="/api/v1", tags=["tags"])
+app.include_router(firmware_info_router, prefix="/api/v1", tags=["firmware-info"])
 
 add_pagination(app)
 
