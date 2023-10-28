@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated
 from uuid import UUID
 
-from calypte_api.devices.repository import IDeviceRepo, RepositoryType
+from calypte_api.devices.repository import DeviceRepositoryType, IDeviceRepo
 from calypte_api.devices.schemas import (
     CreateDeviceRequestBody,
     CreateDeviceResponse,
@@ -137,7 +137,7 @@ class DeviceService(IDeviceService):
         )
 
 
-def get_device_service(device_repo: RepositoryType) -> IDeviceService:
+def get_device_service(device_repo: DeviceRepositoryType) -> IDeviceService:
     return DeviceService(device_repo=device_repo)
 
 

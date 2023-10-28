@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated
 from uuid import UUID
 
-from calypte_api.tags.repository import ITagRepo, RepositoryType
+from calypte_api.tags.repository import ITagRepo, TagRepositoryType
 from calypte_api.tags.schemas import (
     CreateTagRequestBody,
     CreateTagResponse,
@@ -135,7 +135,7 @@ class TagService(ITagService):
         return await self.tag_repo.delete_tag(user_id=user_id, tag_id=tag_id)
 
 
-def get_tag_service(tag_repo: RepositoryType) -> ITagService:
+def get_tag_service(tag_repo: TagRepositoryType) -> ITagService:
     return TagService(tag_repo=tag_repo)
 
 
