@@ -11,6 +11,7 @@ import uvicorn
 
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_limiter import FastAPILimiter
 from fastapi_pagination import add_pagination
 from redis import asyncio as aioredis
 from sqlalchemy.ext.asyncio import (
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
         databases.engine, expire_on_commit=False
     )
     databases.redis = aioredis.from_url(settings.redis_dsn(), encoding="utf-8")
+    await FastAPILimiter.init(databases.redis)
 
     yield
 
