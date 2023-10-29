@@ -10,18 +10,17 @@ class BaseDeviceRequestSchema(BaseModel):
 
 
 class GetDeviceQueryParams(BaseDeviceRequestSchema, Params):
-    name: str | None = Field(default=None)
     # TODO: figure out how to define a list in query params
     # tags: list[UUID] | None = Field(alias="tags")
+    ...
 
 
 class CreateDeviceRequestBody(BaseDeviceRequestSchema):
-    name: str
+    type_id: UUID
     tags: list[UUID]
 
 
 class UpdateDeviceRequestBody(BaseDeviceRequestSchema):
-    name: str
     tags: list[UUID]
 
 
@@ -31,18 +30,22 @@ class BaseDeviceResponseSchema(BaseModel):
 
 class CreateDeviceResponse(BaseDeviceResponseSchema):
     id: UUID
-    name: str
-    tags: list[UUID]
-
     registered_at: datetime | None = Field(alias="registeredAt")
+
+    type_id: UUID
+    tags: list[UUID]
+    firmware_info: list[UUID]
+
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
 
 
 class UpdateDeviceResponse(BaseDeviceResponseSchema):
     id: UUID
-    name: str
+
+    type_id: UUID
     tags: list[UUID]
+    firmware_info: list[UUID]
 
     registered_at: datetime | None = Field(alias="registeredAt")
     created_at: datetime = Field(alias="createdAt")
@@ -51,8 +54,10 @@ class UpdateDeviceResponse(BaseDeviceResponseSchema):
 
 class GetDeviceResponse(BaseDeviceResponseSchema):
     id: UUID
-    name: str
+
+    type_id: UUID
     tags: list[UUID]
+    firmware_info: list[UUID]
 
     registered_at: datetime | None = Field(alias="registeredAt")
     created_at: datetime = Field(alias="createdAt")

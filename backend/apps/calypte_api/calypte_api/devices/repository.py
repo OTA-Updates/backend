@@ -46,7 +46,6 @@ class IDeviceRepo(ABC):
     @abstractmethod
     async def create_device(
         self,
-        name: str,
         user_id: UUID,
         tags: list[UUID],
     ) -> CreateDeviceResponse:
@@ -61,7 +60,7 @@ class IDeviceRepo(ABC):
 
     @abstractmethod
     async def update_device(
-        self, user_id: UUID, device_id: UUID, name: str, tags: list[UUID]
+        self, user_id: UUID, device_id: UUID, tags: list[UUID]
     ) -> UpdateDeviceResponse:
         """
         Update device
@@ -94,9 +93,10 @@ class DeviceRepo(IDeviceRepo):
     ) -> GetDeviceResponse:
         return GetDeviceResponse(
             id=device_id,
-            name="mocked device name",
-            tags=[uuid4(), uuid4(), uuid4()],
             registered_at=None,
+            type_id=uuid4(),
+            tags=[uuid4(), uuid4(), uuid4()],
+            firmware_info=[uuid4(), uuid4()],
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
@@ -106,44 +106,47 @@ class DeviceRepo(IDeviceRepo):
         self, user_id: UUID, query_params: GetDeviceQueryParams
     ) -> list[GetDeviceResponse]:
         tags = [uuid4() for _ in range(10)]
+        firmware_info = [uuid4() for _ in range(10)]
         return [
             GetDeviceResponse(
                 id=uuid4(),
-                name="mocked device name 1",
-                tags=[random.choice(tags) for _ in range(random.randint(1, 3))],
                 registered_at=None if random.randint(0, 1) == 0 else datetime.now(),
+                type_id=uuid4(),
+                tags=[random.choice(tags) for _ in range(random.randint(1, 3))],
+                firmware_info=[random.choice(firmware_info) for _ in range(3)],
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             )
-            for i in range(query_params.size)
+            for _ in range(query_params.size)
         ]
 
     # TODO: implement
     async def create_device(
         self,
         user_id: UUID,
-        name: str,
         tags: list[UUID],
     ) -> CreateDeviceResponse:
         return CreateDeviceResponse(
             id=uuid4(),
-            name=name,
-            tags=tags,
             registered_at=None,
+            type_id=uuid4(),
+            tags=tags,
+            firmware_info=[uuid4(), uuid4()],
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
 
     # TODO: implement
     async def update_device(
-        self, user_id: UUID, device_id: UUID, name: str, tags: list[UUID]
+        self, user_id: UUID, device_id: UUID, tags: list[UUID]
     ) -> UpdateDeviceResponse:
         registered_at = None if random.randint(0, 1) == 0 else datetime.now()
         return UpdateDeviceResponse(
             id=device_id,
-            name=name,
-            tags=tags,
             registered_at=registered_at,
+            type_id=uuid4(),
+            tags=tags,
+            firmware_info=[uuid4(), uuid4()],
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )

@@ -47,6 +47,8 @@ class ITagRepo(ABC):
     async def create_tag(
         self,
         name: str,
+        type_id: UUID,
+        devices_ids: list[UUID],
         user_id: UUID,
     ) -> CreateTagResponse:
         """
@@ -60,7 +62,7 @@ class ITagRepo(ABC):
 
     @abstractmethod
     async def update_tag(
-        self, user_id: UUID, tag_id: UUID, name: str
+        self, user_id: UUID, tag_id: UUID, name: str, devices_ids: list[UUID]
     ) -> UpdateTagResponse:
         """
         Update tag
@@ -95,6 +97,8 @@ class TagRepo(ITagRepo):
     ) -> GetTagResponse:
         return GetTagResponse(
             id=tag_id,
+            type_id=uuid4(),
+            device_id=[uuid4(), uuid4(), uuid4()],
             name="mocked tag name",
             created_at=datetime.now(),
             updated_at=datetime.now(),
@@ -107,6 +111,8 @@ class TagRepo(ITagRepo):
         return [
             GetTagResponse(
                 id=uuid4(),
+                type_id=uuid4(),
+                device_id=[uuid4(), uuid4(), uuid4()],
                 name="mocked tag name 1",
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
@@ -118,10 +124,14 @@ class TagRepo(ITagRepo):
     async def create_tag(
         self,
         user_id: UUID,
+        type_id: UUID,
+        devices_ids: list[UUID],
         name: str,
     ) -> CreateTagResponse:
         return CreateTagResponse(
             id=uuid4(),
+            type_id=type_id,
+            devices_ids=devices_ids,
             name=name,
             created_at=datetime.now(),
             updated_at=datetime.now(),
@@ -129,10 +139,12 @@ class TagRepo(ITagRepo):
 
     # TODO: implement
     async def update_tag(
-        self, user_id: UUID, tag_id: UUID, name: str
+        self, user_id: UUID, tag_id: UUID, name: str, devices_ids: list[UUID]
     ) -> UpdateTagResponse:
         return UpdateTagResponse(
             id=tag_id,
+            type_id=uuid4(),
+            devices_ids=devices_ids,
             name=name,
             created_at=datetime.now(),
             updated_at=datetime.now(),

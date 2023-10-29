@@ -36,7 +36,7 @@ class IFirmwareInfoRepo(ABC):
         self, user_id: UUID, query_params: GetFirmwareInfoQueryParams
     ) -> list[GetFirmwareInfoResponse]:
         """
-        Get firmwares by query params
+        Get firmware by query params
 
         Args:
             user_id (UUID): user id
@@ -65,10 +65,11 @@ class IFirmwareInfoRepo(ABC):
     @abstractmethod
     async def create_firmware(
         self,
+        user_id: UUID,
+        type_id: UUID,
         name: str,
         description: str,
         version: str,
-        user_id: UUID,
     ) -> CreateFirmwareInfoResponse:
         """
         Create firmware
@@ -92,6 +93,7 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
     ) -> GetFirmwareInfoResponse:
         return GetFirmwareInfoResponse(
             id=firmware_id,
+            type_id=uuid4(),
             name="mocked firmware name",
             description="mocked firmware description",
             version="mocked firmware version",
@@ -106,6 +108,7 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
         return [
             GetFirmwareInfoResponse(
                 id=uuid4(),
+                type_id=uuid4(),
                 name="mocked firmware name",
                 description="mocked firmware description",
                 version="mocked firmware version",
@@ -126,6 +129,7 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
     ) -> UpdateFirmwareInfoResponse:
         return UpdateFirmwareInfoResponse(
             id=firmware_id,
+            type_id=uuid4(),
             name=name,
             description=description,
             version=version,
@@ -135,13 +139,15 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
 
     async def create_firmware(
         self,
+        user_id: UUID,
+        type_id: UUID,
         name: str,
         description: str,
         version: str,
-        user_id: UUID,
     ) -> CreateFirmwareInfoResponse:
         return CreateFirmwareInfoResponse(
             id=uuid4(),
+            type_id=type_id,
             name=name,
             description=description,
             version=version,

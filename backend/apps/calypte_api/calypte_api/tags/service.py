@@ -117,6 +117,8 @@ class TagService(ITagService):
         return await self.tag_repo.create_tag(
             user_id=user_id,
             name=request_body.name,
+            type_id=request_body.type_id,
+            devices_ids=request_body.devices_ids,
         )
 
     async def update_tag(
@@ -129,6 +131,7 @@ class TagService(ITagService):
             user_id=user_id,
             tag_id=tag_id,
             name=request_body.name,
+            devices_ids=request_body.devices_ids,
         )
 
     async def delete_tag(self, user_id: UUID, tag_id: UUID) -> None:

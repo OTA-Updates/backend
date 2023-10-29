@@ -16,9 +16,14 @@ class GetTagQueryParams(BaseTagRequestSchema, Params):
 class CreateTagRequestBody(BaseTagRequestSchema):
     name: str
 
+    type_id: UUID
+    devices_ids: list[UUID]
+
 
 class UpdateTagRequestBody(BaseTagRequestSchema):
     name: str
+
+    devices_ids: list[UUID]
 
 
 class BaseTagResponseSchema(BaseModel):
@@ -29,6 +34,9 @@ class CreateTagResponse(BaseTagResponseSchema):
     id: UUID
     name: str
 
+    type_id: UUID
+    devices_ids: list[UUID]
+
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
 
@@ -37,6 +45,9 @@ class UpdateTagResponse(BaseTagResponseSchema):
     id: UUID
     name: str
 
+    type_id: UUID
+    devices_ids: list[UUID]
+
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
 
@@ -44,6 +55,9 @@ class UpdateTagResponse(BaseTagResponseSchema):
 class GetTagResponse(BaseTagResponseSchema):
     id: UUID
     name: str
+
+    type_id: UUID
+    device_id: list[UUID]
 
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")

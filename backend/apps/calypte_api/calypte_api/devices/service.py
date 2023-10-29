@@ -114,7 +114,6 @@ class DeviceService(IDeviceService):
     ) -> CreateDeviceResponse:
         return await self.device_repo.create_device(
             user_id=user_id,
-            name=request_body.name,
             tags=request_body.tags,
         )
 
@@ -127,7 +126,6 @@ class DeviceService(IDeviceService):
         return await self.device_repo.update_device(
             user_id=user_id,
             device_id=device_id,
-            name=request_body.name,
             tags=request_body.tags,
         )
 

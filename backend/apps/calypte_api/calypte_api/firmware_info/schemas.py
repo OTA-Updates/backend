@@ -16,12 +16,15 @@ class FirmwareInfoUpdateRequestBody(BaseFirmwareRequestSchema):
 
 
 class CreateFirmwareInfoRequestBody(BaseFirmwareRequestSchema):
+    type_id: UUID
+
     name: str
     version: str
     description: str
 
 
 class GetFirmwareInfoQueryParams(BaseFirmwareRequestSchema, Params):
+    type_id: UUID | None = Field(default=None)
     name: str | None = Field(default=None)
     device: str | None = Field(default=None)
 
@@ -32,6 +35,8 @@ class BaseFirmwareResponseSchema(BaseModel):
 
 class UpdateFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
+    type_id: UUID | None = Field(default=None)
+
     name: str
     version: str
     description: str
@@ -42,6 +47,8 @@ class UpdateFirmwareInfoResponse(BaseFirmwareResponseSchema):
 
 class CreateFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
+    type_id: UUID | None = Field(default=None)
+
     name: str
     version: str
     description: str
@@ -52,6 +59,8 @@ class CreateFirmwareInfoResponse(BaseFirmwareResponseSchema):
 
 class GetFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
+    type_id: UUID | None = Field(default=None)
+
     name: str
     version: str
     description: str

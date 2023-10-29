@@ -17,6 +17,8 @@ classDiagram
         + UUID id
         + UUID type_id
         + UUID device_lookup_id
+
+        + String name
     }
     class Device {
         + UUID id
