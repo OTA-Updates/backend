@@ -5,9 +5,10 @@ from uuid import UUID, uuid4
 
 from calypte_api.common.dependencies import DBSessionType
 from calypte_api.firmware_info.schemas import (
-    FirmwareInfoUpdateResponse,
+    CreateFirmwareInfoResponse,
     GetFirmwareInfoQueryParams,
     GetFirmwareInfoResponse,
+    UpdateFirmwareInfoResponse,
 )
 
 from fastapi import Depends
@@ -50,13 +51,30 @@ class IFirmwareInfoRepo(ABC):
         name: str,
         description: str,
         version: str,
-    ) -> FirmwareInfoUpdateResponse:
+    ) -> UpdateFirmwareInfoResponse:
         """
         Update firmware
 
         Args:
             user_id (UUID): user id
             firmware_id (UUID): firmware id
+            name (str): firmware name
+            description (str): firmware description
+        """
+
+    @abstractmethod
+    async def create_firmware(
+        self,
+        name: str,
+        description: str,
+        version: str,
+        user_id: UUID,
+    ) -> CreateFirmwareInfoResponse:
+        """
+        Create firmware
+
+        Args:
+            user_id (UUID): user id
             name (str): firmware name
             description (str): firmware description
         """
@@ -105,9 +123,25 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
         name: str,
         description: str,
         version: str,
-    ) -> FirmwareInfoUpdateResponse:
-        return FirmwareInfoUpdateResponse(
+    ) -> UpdateFirmwareInfoResponse:
+        return UpdateFirmwareInfoResponse(
             id=firmware_id,
+            name=name,
+            description=description,
+            version=version,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+
+    async def create_firmware(
+        self,
+        name: str,
+        description: str,
+        version: str,
+        user_id: UUID,
+    ) -> CreateFirmwareInfoResponse:
+        return CreateFirmwareInfoResponse(
+            id=uuid4(),
             name=name,
             description=description,
             version=version,

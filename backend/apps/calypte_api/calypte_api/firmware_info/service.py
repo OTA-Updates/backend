@@ -7,10 +7,12 @@ from calypte_api.firmware_info.repository import (
     IFirmwareInfoRepo,
 )
 from calypte_api.firmware_info.schemas import (
+    CreateFirmwareInfoRequestBody,
+    CreateFirmwareInfoResponse,
     FirmwareInfoUpdateRequestBody,
-    FirmwareInfoUpdateResponse,
     GetFirmwareInfoQueryParams,
     GetFirmwareInfoResponse,
+    UpdateFirmwareInfoResponse,
 )
 
 from fastapi import Depends
@@ -43,6 +45,8 @@ class IFirmwareService(ABC):
         Args:
             user_id (UUID): user id
 
+        returns:
+            list[GetFirmwareInfoResponse]: list of firmware info
         """
 
     @abstractmethod
@@ -51,7 +55,7 @@ class IFirmwareService(ABC):
         user_id: UUID,
         firmware_id: UUID,
         request_body: FirmwareInfoUpdateRequestBody,
-    ) -> FirmwareInfoUpdateResponse:
+    ) -> UpdateFirmwareInfoResponse:
         """
         Update firmware
 
@@ -59,6 +63,26 @@ class IFirmwareService(ABC):
             user_id (UUID): user id
             firmware_id (UUID): firmware id
             request_body (CreateFirmwareRequestBody): request body
+
+        returns:
+            UpdateFirmwareInfoResponse: updated firmware info
+        """
+
+    @abstractmethod
+    async def create_firmware(
+        self,
+        user_id: UUID,
+        request_body: CreateFirmwareInfoRequestBody,
+    ) -> CreateFirmwareInfoResponse:
+        """
+        Create firmware
+
+        Args:
+            user_id (UUID): user id
+            request_body (CreateFirmwareRequestBody): request body
+
+        returns:
+            CreateFirmwareInfoResponse: created firmware info
         """
 
 
@@ -94,10 +118,22 @@ class FirmwareService(IFirmwareService):
         user_id: UUID,
         firmware_id: UUID,
         request_body: FirmwareInfoUpdateRequestBody,
-    ) -> FirmwareInfoUpdateResponse:
+    ) -> UpdateFirmwareInfoResponse:
         return await self.firmware_repo.update_firmware(
             user_id=user_id,
             firmware_id=firmware_id,
+            name=request_body.name,
+            description=request_body.description,
+            version=request_body.version,
+        )
+
+    async def create_firmware(
+        self,
+        user_id: UUID,
+        request_body: CreateFirmwareInfoRequestBody,
+    ) -> CreateFirmwareInfoResponse:
+        return await self.firmware_repo.create_firmware(
+            user_id=user_id,
             name=request_body.name,
             description=request_body.description,
             version=request_body.version,

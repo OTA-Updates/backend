@@ -15,6 +15,12 @@ class FirmwareInfoUpdateRequestBody(BaseFirmwareRequestSchema):
     description: str
 
 
+class CreateFirmwareInfoRequestBody(BaseFirmwareRequestSchema):
+    name: str
+    version: str
+    description: str
+
+
 class GetFirmwareInfoQueryParams(BaseFirmwareRequestSchema, Params):
     name: str | None = Field(default=None)
     device: str | None = Field(default=None)
@@ -24,7 +30,17 @@ class BaseFirmwareResponseSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class FirmwareInfoUpdateResponse(BaseFirmwareResponseSchema):
+class UpdateFirmwareInfoResponse(BaseFirmwareResponseSchema):
+    id: UUID
+    name: str
+    version: str
+    description: str
+
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
+
+
+class CreateFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
     name: str
     version: str
