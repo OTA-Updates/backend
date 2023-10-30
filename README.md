@@ -1,2 +1,2 @@
-# backend
-backend for the OTA project
+# Calypte
+[database_model](docs/database_model.md)

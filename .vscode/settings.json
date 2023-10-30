@@ -1,0 +1,19 @@
+{
+    "ruff.enableExperimentalFormatter": true,
+    "ruff.enable": true,
+    "ruff.lint.run": "onSave",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": true,
+            "source.organizeImports.ruff": true
+        }
+    },
+    "cSpell.words": [
+        "aioredis",
+        "calypte",
+        "filebeat",
+        "MINIO"
+    ]
+}
