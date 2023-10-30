@@ -19,8 +19,8 @@ async def get_db_session() -> AsyncGenerator[None, AsyncSession]:
     if async_session is None:
         raise RuntimeError("SQL client has not been defined.")
 
-    async with async_session() as db:
-        yield db
+    async with async_session() as session:
+        yield session
 
 
 async def get_redis_client() -> Redis:
