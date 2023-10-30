@@ -2,14 +2,26 @@ import uuid
 
 from datetime import datetime
 
+from calypte_api.common.settings import get_settings
+from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
 
 
-class Base(AsyncAttrs, DeclarativeBase):
-    ...
+settings = get_settings()
+
+
+class BaseModel(AsyncAttrs, DeclarativeBase):
+    metadata = MetaData(schema=settings.postgres_schema)
+
+
+class CompanyMixin:
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
 
 
 class UUIDMixin:
@@ -22,6 +34,6 @@ class UUIDMixin:
 
 class TimeStampedMixin:
     created_at: Mapped[datetime] = mapped_column(default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()
     )

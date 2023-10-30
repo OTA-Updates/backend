@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_host: str
     postgres_port: int
+    postgres_schema: str
 
     redis_host: str
     redis_port: int
