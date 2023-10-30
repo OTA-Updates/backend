@@ -24,20 +24,24 @@ class UpdateTypeRequestBody(BaseTypeRequestSchema):
 
 
 class BaseTypeResponseSchema(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
 
 class CreateTypeResponse(BaseTypeResponseSchema):
     id: UUID
+    company_id: UUID
+
     name: str
     description: str | None
 
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime
 
 
 class UpdateTypeResponse(BaseTypeResponseSchema):
     id: UUID
+    company_id: UUID
+
     name: str
     description: str | None
 
@@ -47,6 +51,8 @@ class UpdateTypeResponse(BaseTypeResponseSchema):
 
 class GetTypeResponse(BaseTypeResponseSchema):
     id: UUID
+    company_id: UUID
+
     name: str
     description: str | None
 
