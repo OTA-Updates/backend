@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from calypte_api.common.dependencies import DBSessionType
+from calypte_api.types.models import Type
 from calypte_api.types.schemas import (
     CreateTypeResponse,
-    GetTypeQueryParams,
     GetTypeResponse,
     UpdateTypeResponse,
 )
 
 from fastapi import Depends
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -33,7 +33,7 @@ class ITypeRepo(ABC):
 
     @abstractmethod
     async def get_types(
-        self, user_id: UUID, query_params: GetTypeQueryParams
+        self, company_id: UUID, name: str | None, offset: int, limit: int
     ) -> list[GetTypeResponse]:
         """
         Get types by query params
@@ -88,69 +88,82 @@ class TypeRepo(ITypeRepo):
     def __init__(self, db_session: AsyncSession) -> None:
         self.db_session = db_session
 
-    # TODO: implement
     async def get_type_by_id(
         self,
-        user_id: UUID,
+        company_id: UUID,
         type_id: UUID,
-    ) -> GetTypeResponse:
-        return GetTypeResponse(
-            id=type_id,
-            name="type name",
-            description="type description",
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+    ) -> GetTypeResponse | None:
+        select_stmt = (
+            select(Type).where(Type.company_id == company_id).where(Type.id == type_id)
         )
+        types_models = await self.db_session.scalar(statement=select_stmt)
 
-    # TODO: implement
+        return types_models and GetTypeResponse.model_validate(types_models)
+
     async def get_types(
-        self, user_id: UUID, query_params: GetTypeQueryParams
+        self, company_id: UUID, name: str | None, offset: int, limit: int
     ) -> list[GetTypeResponse]:
-        return [
-            GetTypeResponse(
-                id=uuid4(),
-                name="type name",
-                description="type description",
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
-            for _ in range(query_params.size)
-        ]
+        select_stmt = (
+            select(Type)
+            .where(Type.company_id == company_id)
+            .order_by(Type.created_at)
+            .offset(offset=offset)
+            .limit(limit=limit)
+        )
+        select_stmt = select_stmt.where(Type.name == name) if name else select_stmt
 
-    # TODO: implement
+        types_models = await self.db_session.scalars(statement=select_stmt)
+
+        get_type_schemas = [
+            GetTypeResponse.model_validate(type_model)
+            for type_model in types_models.all()
+        ]
+        return get_type_schemas
+
     async def create_type(
         self,
-        user_id: UUID,
+        company_id: UUID,
         name: str,
         description: str | None,
     ) -> CreateTypeResponse:
-        return CreateTypeResponse(
-            id=uuid4(),
-            name=name,
-            description=description,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        insert_stmt = (
+            insert(Type)
+            .values(name=name, description=description, company_id=company_id)
+            .returning(Type)
         )
+        result = await self.db_session.execute(insert_stmt)
+        new_type = result.scalar_one()
 
-    # TODO: implement
+        # * I am not sure commit about the commit in the repo
+        # * It maybe make more sense to do it on higher level
+        # await self.db_session.commit()
+
+        return CreateTypeResponse.model_validate(new_type)
+
     async def update_type(
         self,
-        user_id: UUID,
+        company_id: UUID,
         type_id: UUID,
         name: str,
         description: str | None,
     ) -> UpdateTypeResponse:
-        return UpdateTypeResponse(
-            id=type_id,
-            name=name,
-            description=description,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        update_stmt = (
+            update(Type)
+            .where(Type.id == type_id)
+            .where(Type.company_id == company_id)
+            .values(name=name, description=description)
+            .returning(Type)
         )
+        result = await self.db_session.execute(update_stmt)
+        new_type = result.scalar_one()
 
-    # TODO: implement
-    async def delete_type(self, user_id: UUID, type_id: UUID) -> None:
-        return None
+        return UpdateTypeResponse.model_validate(new_type)
+
+    async def delete_type(self, company_id: UUID, type_id: UUID) -> None:
+        delete_stmt = (
+            delete(Type).where(Type.id == type_id).where(Type.company_id == company_id)
+        )
+        await self.db_session.execute(delete_stmt)
 
 
 def get_type_repo(db_session: DBSessionType) -> ITypeRepo:

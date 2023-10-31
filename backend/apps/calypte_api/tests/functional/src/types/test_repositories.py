@@ -106,3 +106,66 @@ async def test_create_type(
     assert type_object.name == name
     assert type_object.description == description
     assert type_object.company_id == company_id
+
+
+@pytest.mark.parametrize(
+    "name, description",
+    [
+        (
+            "test name",
+            "test description",
+        ),
+    ],
+)
+async def test_update_type(
+    test_type_data: list[dict],
+    type_repo: TypeRepo,
+    name: str,
+    description: str | None,
+) -> None:
+    type_id = test_type_data[0]["id"]
+    company_id = test_type_data[0]["company_id"]
+    type_object = await type_repo.update_type(
+        type_id=type_id,
+        company_id=company_id,
+        name=name,
+        description=description,
+    )
+    assert type_object.id == type_id
+    assert type_object.name == name
+    assert type_object.description == description
+
+
+@pytest.mark.parametrize(
+    "name, description",
+    [
+        (
+            "test name",
+            "test description",
+        ),
+    ],
+)
+async def test_delete_type(
+    test_type_data: list[dict],
+    type_repo: TypeRepo,
+    name: str,
+    description: str | None,
+) -> None:
+    type_id = test_type_data[0]["id"]
+    company_id = test_type_data[0]["company_id"]
+
+    type_object = await type_repo.get_type_by_id(
+        type_id=type_id,
+        company_id=company_id,
+    )
+    assert type_object is not None
+
+    await type_repo.delete_type(
+        type_id=type_id,
+        company_id=company_id,
+    )
+    type_object = await type_repo.get_type_by_id(
+        type_id=type_id,
+        company_id=company_id,
+    )
+    assert type_object is None
