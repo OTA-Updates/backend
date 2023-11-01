@@ -14,7 +14,9 @@
         "aioredis",
         "calypte",
         "filebeat",
+        "isouter",
         "MINIO",
+        "ondelete",
         "pytestmark"
     ],
     "python.testing.pytestArgs": [
