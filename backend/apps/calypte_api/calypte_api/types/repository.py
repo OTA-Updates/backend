@@ -83,6 +83,18 @@ class ITypeRepo(ABC):
             type_id (UUID): type id
         """
 
+    @abstractmethod
+    async def check_type_belongs_to_company(
+        self, company_id: UUID, type_id: UUID
+    ):
+        """
+        Check that type belongs to company
+
+        Args:
+            company_id (UUID): user id
+            type_id (UUID): type id
+        """
+
 
 class TypeRepo(ITypeRepo):
     def __init__(self, db_session: AsyncSession) -> None:
@@ -94,7 +106,9 @@ class TypeRepo(ITypeRepo):
         type_id: UUID,
     ) -> GetTypeResponse | None:
         select_stmt = (
-            select(Type).where(Type.company_id == company_id).where(Type.id == type_id)
+            select(Type)
+            .where(Type.company_id == company_id)
+            .where(Type.id == type_id)
         )
         types_models = await self.db_session.scalar(statement=select_stmt)
 
@@ -110,13 +124,14 @@ class TypeRepo(ITypeRepo):
             .offset(offset=offset)
             .limit(limit=limit)
         )
-        select_stmt = select_stmt.where(Type.name == name) if name else select_stmt
+        if name is not None:
+            select_stmt = select_stmt.where(Type.name == name)
 
         types_models = await self.db_session.scalars(statement=select_stmt)
 
         get_type_schemas = [
             GetTypeResponse.model_validate(type_model)
-            for type_model in types_models.all()
+            for type_model in types_models
         ]
         return get_type_schemas
 
@@ -161,9 +176,20 @@ class TypeRepo(ITypeRepo):
 
     async def delete_type(self, company_id: UUID, type_id: UUID) -> None:
         delete_stmt = (
-            delete(Type).where(Type.id == type_id).where(Type.company_id == company_id)
+            delete(Type)
+            .where(Type.id == type_id)
+            .where(Type.company_id == company_id)
         )
         await self.db_session.execute(delete_stmt)
+
+    async def check_type_belongs_to_company(
+        self, company_id: UUID, type_id: UUID
+    ) -> bool:
+        # TODO: it make sense to optimize this query
+        type_schema = await self.get_type_by_id(
+            company_id=company_id, type_id=type_id
+        )
+        return bool(type_schema)
 
 
 def get_type_repo(db_session: DBSessionType) -> ITypeRepo:

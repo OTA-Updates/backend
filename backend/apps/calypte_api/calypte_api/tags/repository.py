@@ -84,6 +84,30 @@ class ITagRepo(ABC):
             tag_id (UUID): tag id
         """
 
+    @abstractmethod
+    async def check_tags_belongs_to_company(
+        self, company_id: UUID, tags: list[UUID]
+    ) -> None:
+        """
+        Check that tags belongs to company
+
+        Args:
+            company_id (UUID): user id
+            tags (list[UUID]): tags
+        """
+
+    @abstractmethod
+    async def check_tags_belongs_to_type(
+        self, type_id: UUID, tags: list[UUID]
+    ):
+        """
+        Check that tags belongs to type
+
+        Args:
+            type_id (UUID): type id
+            tags (list[UUID]): tags
+        """
+
 
 class TagRepo(ITagRepo):
     def __init__(self, db_session: AsyncSession) -> None:

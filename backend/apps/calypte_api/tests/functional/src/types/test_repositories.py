@@ -19,8 +19,8 @@ async def type_repo(db_session: AsyncSession):
 
 @pytest_asyncio.fixture(scope="function")
 async def test_type_data(db_session: AsyncSession):
-    company_ids = [uuid4() for _ in range(10)]
-    values = [
+    company_ids = [uuid4() for _ in range(2)]
+    type_values = [
         {
             "id": uuid4(),
             "company_id": random.choice(company_ids),
@@ -28,14 +28,17 @@ async def test_type_data(db_session: AsyncSession):
             "description": f"test description {i}",
             "created_at": datetime.now(),
         }
-        for i in range(100)
+        for i in range(10)
     ]
-    await db_session.execute(insert(Type).values(values))
+    await db_session.execute(insert(Type).values(type_values))
     await db_session.commit()
-    return values
+    return type_values
 
 
-async def test_get_type_by_id(test_type_data: list[dict], type_repo: TypeRepo) -> None:
+async def test_get_type_by_id(
+    test_type_data: list[dict],
+    type_repo: TypeRepo,
+) -> None:
     expected_type = test_type_data[0]
     type_object = await type_repo.get_type_by_id(
         company_id=expected_type["company_id"],
@@ -169,3 +172,33 @@ async def test_delete_type(
         company_id=company_id,
     )
     assert type_object is None
+
+
+async def test_check_type_does_belong_to_company(
+    test_type_data: list[dict],
+    type_repo: TypeRepo,
+) -> None:
+    type_id = test_type_data[0]["id"]
+    company_id = test_type_data[0]["company_id"]
+
+    type_object = await type_repo.check_type_belongs_to_company(
+        type_id=type_id,
+        company_id=company_id,
+    )
+
+    assert type_object is True
+
+
+async def test_check_type_does_not_belong_to_company(
+    test_type_data: list[dict],
+    type_repo: TypeRepo,
+) -> None:
+    type_id = uuid4()
+    company_id = test_type_data[0]["company_id"]
+
+    type_object = await type_repo.check_type_belongs_to_company(
+        type_id=type_id,
+        company_id=company_id,
+    )
+
+    assert type_object is False

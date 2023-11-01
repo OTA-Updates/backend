@@ -63,4 +63,7 @@ def get_firmware_service(firmware_repo: FirmwareRepoType) -> IFirmwareService:
     return FirmwareService(firmware_repo=firmware_repo)
 
 
-FirmwareServiceType = Annotated[IFirmwareService, Depends(get_firmware_service)]
+FirmwareServiceType = Annotated[
+    IFirmwareService,
+    Depends(get_firmware_service),
+]

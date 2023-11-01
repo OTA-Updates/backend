@@ -6,6 +6,7 @@ from typing import Annotated
 from calypte_api.common.authorization import JWTBearer, JwtClaims
 from calypte_api.common.databases import get_db_session, get_redis_client
 from calypte_api.common.settings import get_settings
+
 from fastapi import Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter
 from redis.asyncio import Redis
@@ -38,7 +39,10 @@ def check_permission(user_role: str) -> CheckPermissionType:
         if user_role != user_token.user.role:
             raise HTTPException(
                 status_code=http.HTTPStatus.FORBIDDEN,
-                detail="User does not have a permission to perform this action.",
+                detail=(
+                    "User does not have a permission"
+                    " to perform this action."
+                ),
             )
 
         return user_token

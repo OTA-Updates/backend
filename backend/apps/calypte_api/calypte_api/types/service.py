@@ -134,7 +134,10 @@ class TypeService(ITypeService):
         )
 
     async def delete_type(self, user_id: UUID, type_id: UUID) -> None:
-        return await self.type_repo.delete_type(user_id=user_id, type_id=type_id)
+        return await self.type_repo.delete_type(
+            user_id=user_id,
+            type_id=type_id,
+        )
 
 
 def get_type_service(type_repo: TypeRepositoryType) -> ITypeService:

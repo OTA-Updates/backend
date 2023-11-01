@@ -94,14 +94,14 @@ class DeviceService(IDeviceService):
         device_id: UUID,
     ) -> GetDeviceResponse:
         return await self.device_repo.get_device_by_id(
-            user_id=user_id, device_id=device_id
+            company_id=user_id, device_id=device_id
         )
 
     async def get_devices(
         self, user_id: UUID, query_params: GetDeviceQueryParams
     ) -> Page[GetDeviceResponse]:
         devices = await self.device_repo.get_devices(
-            user_id=user_id, query_params=query_params
+            company_id=user_id, query_params=query_params
         )
         return Page.create(
             items=devices,
@@ -113,7 +113,7 @@ class DeviceService(IDeviceService):
         self, user_id: UUID, request_body: CreateDeviceRequestBody
     ) -> CreateDeviceResponse:
         return await self.device_repo.create_device(
-            user_id=user_id,
+            company_id=user_id,
             tags=request_body.tags,
         )
 
@@ -124,14 +124,14 @@ class DeviceService(IDeviceService):
         request_body: UpdateDeviceRequestBody,
     ) -> UpdateDeviceResponse:
         return await self.device_repo.update_device(
-            user_id=user_id,
+            company_id=user_id,
             device_id=device_id,
             tags=request_body.tags,
         )
 
     async def delete_device(self, user_id: UUID, device_id: UUID) -> None:
         return await self.device_repo.delete_device(
-            user_id=user_id, device_id=device_id
+            company_id=user_id, device_id=device_id
         )
 
 

@@ -13,4 +13,7 @@ class Type(BaseModel, CompanyMixin, UUIDMixin, TimeStampedMixin):
     __tablename__ = "types"
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    description: Mapped[str | None] = mapped_column(
+        String(1000),
+        nullable=True,
+    )

@@ -1,6 +1,10 @@
 from uuid import UUID
 
-from calypte_api.common.dependencies import JwtClaims, RateLimiterType, check_permission
+from calypte_api.common.dependencies import (
+    JwtClaims,
+    RateLimiterType,
+    check_permission,
+)
 from calypte_api.common.user_roles import UserRole
 from calypte_api.types import schemas as type_schemas
 from calypte_api.types.service import TypeServiceType

@@ -9,7 +9,7 @@ asyncio_mode = "auto"
 
 [tool.ruff]
 exclude = [".git", "docs", "build", "dist", "venv"]
-line-length = 88
+line-length = 79
 target-version = "py312"
 fixable = [
     "A",

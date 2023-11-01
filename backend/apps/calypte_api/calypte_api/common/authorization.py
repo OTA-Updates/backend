@@ -2,6 +2,7 @@ import http
 import time
 
 from calypte_api.common.settings import get_settings
+
 from fastapi import HTTPException, Request
 from fastapi.security import HTTPBearer
 from jose import jwt

@@ -11,11 +11,15 @@ class BaseDeviceRequestSchema(BaseModel):
 
 class GetDeviceQueryParams(BaseDeviceRequestSchema, Params):
     # TODO: figure out how to define a list in query params
+    name: str | None = Field(default=None)
     # tags: list[UUID] | None = Field(alias="tags")
-    ...
 
 
 class CreateDeviceRequestBody(BaseDeviceRequestSchema):
+    name: str
+    description: str | None = Field(default=None)
+
+    company_id: UUID
     type_id: UUID
     tags: list[UUID]
 
@@ -25,40 +29,52 @@ class UpdateDeviceRequestBody(BaseDeviceRequestSchema):
 
 
 class BaseDeviceResponseSchema(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
 
 class CreateDeviceResponse(BaseDeviceResponseSchema):
     id: UUID
-    registered_at: datetime | None = Field(alias="registeredAt")
 
+    name: str
+    description: str | None
+    registered_at: datetime | None
+
+    company_id: UUID
     type_id: UUID
     tags: list[UUID]
-    firmware_info: list[UUID]
+    firmware_info_id: UUID | None
 
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime
 
 
 class UpdateDeviceResponse(BaseDeviceResponseSchema):
     id: UUID
 
+    company_id: UUID
+    name: str
+    description: str | None
+    registered_at: datetime | None
+
     type_id: UUID
     tags: list[UUID]
-    firmware_info: list[UUID]
+    firmware_info_id: UUID | None
 
-    registered_at: datetime | None = Field(alias="registeredAt")
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime
 
 
 class GetDeviceResponse(BaseDeviceResponseSchema):
     id: UUID
 
-    type_id: UUID
-    tags: list[UUID]
-    firmware_info: list[UUID]
+    company_id: UUID
+    name: str
+    description: str | None
+    registered_at: datetime | None
 
-    registered_at: datetime | None = Field(alias="registeredAt")
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    type_id: UUID
+    firmware_info_id: UUID
+    tags: list[UUID]
+
+    created_at: datetime
+    updated_at: datetime

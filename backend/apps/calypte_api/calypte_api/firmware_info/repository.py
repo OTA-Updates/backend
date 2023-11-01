@@ -80,6 +80,30 @@ class IFirmwareInfoRepo(ABC):
             description (str): firmware description
         """
 
+    @abstractmethod
+    async def check_firmware_belongs_to_company(
+        self, company_id: UUID, firmware_id: UUID
+    ):
+        """
+        Check that firmware belongs to company
+
+        Args:
+            company_id (UUID): user id
+            firmware_id (UUID): firmware id
+        """
+
+    @abstractmethod
+    async def check_firmware_belongs_to_type(
+        self, type_id: UUID, firmware_id: UUID
+    ):
+        """
+        Check that firmware belongs to type
+
+        Args:
+            type_id (UUID): type id
+            firmware_id (UUID): firmware id
+        """
+
 
 class FirmwareInfoRepo(IFirmwareInfoRepo):
     def __init__(self, db_session: AsyncSession) -> None:
