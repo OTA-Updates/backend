@@ -202,11 +202,13 @@ class DeviceRepo(IDeviceRepo):
         insert_device_stmt = (
             insert(Device)
             .values(
-                type_id=type_id,
-                firmware_info_id=firmware_info_id,
-                name=name,
-                description=description,
-                company_id=company_id,
+                {
+                    Device.type_id: type_id,
+                    Device.firmware_info_id: firmware_info_id,
+                    Device.name: name,
+                    Device.description: description,
+                    Device.company_id: company_id,
+                }
             )
             .returning(Device)
         )

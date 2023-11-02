@@ -143,7 +143,13 @@ class TypeRepo(ITypeRepo):
     ) -> CreateTypeResponse:
         insert_stmt = (
             insert(Type)
-            .values(name=name, description=description, company_id=company_id)
+            .values(
+                {
+                    Type.name: name,
+                    Type.description: description,
+                    Type.company_id: company_id,
+                }
+            )
             .returning(Type)
         )
         result = await self.db_session.execute(insert_stmt)
