@@ -15,12 +15,14 @@ class GetTagQueryParams(BaseTagRequestSchema, Params):
 
 class CreateTagRequestBody(BaseTagRequestSchema):
     name: str
+    color: str
 
     type_id: UUID
 
 
 class UpdateTagRequestBody(BaseTagRequestSchema):
     name: str
+    color: str
 
 
 class BaseTagResponseSchema(BaseModel):
@@ -29,32 +31,38 @@ class BaseTagResponseSchema(BaseModel):
 
 class CreateTagResponse(BaseTagResponseSchema):
     id: UUID
+
+    color: str
     name: str
 
     company_id: UUID
     type_id: UUID
 
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime
 
 
 class UpdateTagResponse(BaseTagResponseSchema):
     id: UUID
+
+    color: str
     name: str
 
     company_id: UUID
     type_id: UUID
 
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime
 
 
 class GetTagResponse(BaseTagResponseSchema):
     id: UUID
+
+    color: str
     name: str
 
     company_id: UUID
     type_id: UUID
 
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime

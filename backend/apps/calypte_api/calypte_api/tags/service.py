@@ -20,39 +20,39 @@ class ITagService(ABC):
     @abstractmethod
     async def get_tag(
         self,
-        user_id: UUID,
+        company_id: UUID,
         tag_id: UUID,
     ) -> GetTagResponse:
         """
         Get tag by id
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             tag_id (UUID): tag id
 
         """
 
     @abstractmethod
     async def get_tags(
-        self, user_id: UUID, query_params: GetTagQueryParams
+        self, company_id: UUID, query_params: GetTagQueryParams
     ) -> Page[GetTagResponse]:
         """
         Get all tags
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
 
         """
 
     @abstractmethod
     async def create_tag(
-        self, user_id: UUID, request_body: CreateTagRequestBody
+        self, company_id: UUID, request_body: CreateTagRequestBody
     ) -> CreateTagResponse:
         """
         Create tag
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             request_body (CreateTagRequestBody): request body
 
         """
@@ -60,7 +60,7 @@ class ITagService(ABC):
     @abstractmethod
     async def update_tag(
         self,
-        user_id: UUID,
+        company_id: UUID,
         tag_id: UUID,
         request_body: UpdateTagRequestBody,
     ) -> UpdateTagResponse:
@@ -68,18 +68,18 @@ class ITagService(ABC):
         Update tag
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             tag_id (UUID): tag id
             request_body (CreateTagRequestBody): request body
         """
 
     @abstractmethod
-    async def delete_tag(self, user_id: UUID, tag_id: UUID) -> None:
+    async def delete_tag(self, company_id: UUID, tag_id: UUID) -> None:
         """
         Delete tag
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             tag_id (UUID): tag id
         """
 
@@ -90,20 +90,25 @@ class TagService(ITagService):
 
     async def get_tag(
         self,
-        user_id: UUID,
+        company_id: UUID,
         tag_id: UUID,
     ) -> GetTagResponse:
         return await self.tag_repo.get_tag_by_id(
-            user_id=user_id,
+            company_id=company_id,
             tag_id=tag_id,
         )
 
     async def get_tags(
-        self, user_id: UUID, query_params: GetTagQueryParams
+        self, company_id: UUID, query_params: GetTagQueryParams
     ) -> Page[GetTagResponse]:
+        limit = query_params.size
+        offset = (query_params.page - 1) * query_params.size
+
         tags = await self.tag_repo.get_tags(
-            user_id=user_id,
-            query_params=query_params,
+            company_id=company_id,
+            offset=offset,
+            limit=limit,
+            name=query_params.name,
         )
         return Page.create(
             items=tags,
@@ -112,30 +117,32 @@ class TagService(ITagService):
         )
 
     async def create_tag(
-        self, user_id: UUID, request_body: CreateTagRequestBody
+        self, company_id: UUID, request_body: CreateTagRequestBody
     ) -> CreateTagResponse:
         return await self.tag_repo.create_tag(
-            user_id=user_id,
+            company_id=company_id,
             name=request_body.name,
+            color=request_body.color,
             type_id=request_body.type_id,
-            devices_ids=request_body.devices_ids,
         )
 
     async def update_tag(
         self,
-        user_id: UUID,
+        company_id: UUID,
         tag_id: UUID,
         request_body: UpdateTagRequestBody,
     ) -> UpdateTagResponse:
         return await self.tag_repo.update_tag(
-            user_id=user_id,
+            company_id=company_id,
             tag_id=tag_id,
             name=request_body.name,
-            devices_ids=request_body.devices_ids,
+            color=request_body.color,
         )
 
-    async def delete_tag(self, user_id: UUID, tag_id: UUID) -> None:
-        return await self.tag_repo.delete_tag(user_id=user_id, tag_id=tag_id)
+    async def delete_tag(self, company_id: UUID, tag_id: UUID) -> None:
+        return await self.tag_repo.delete_tag(
+            company_id=company_id, tag_id=tag_id
+        )
 
 
 def get_tag_service(tag_repo: TagRepositoryType) -> ITagService:
