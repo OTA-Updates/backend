@@ -26,6 +26,7 @@ class CreateFirmwareInfoRequestBody(BaseFirmwareRequestSchema):
 class GetFirmwareInfoQueryParams(BaseFirmwareRequestSchema, Params):
     type_id: UUID | None = Field(default=None)
     name: str | None = Field(default=None)
+    version: str | None = Field(default=None)
 
 
 class BaseFirmwareResponseSchema(BaseModel):

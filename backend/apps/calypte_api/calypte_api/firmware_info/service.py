@@ -23,27 +23,27 @@ class IFirmwareService(ABC):
     @abstractmethod
     async def get_firmware_info(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
     ) -> GetFirmwareInfoResponse:
         """
         Get firmware by id
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             firmware_id (UUID): firmware id
 
         """
 
     @abstractmethod
     async def get_firmware_list(
-        self, user_id: UUID, query_params: GetFirmwareInfoQueryParams
+        self, company_id: UUID, query_params: GetFirmwareInfoQueryParams
     ) -> Page[GetFirmwareInfoResponse]:
         """
         Get all firmwares
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
 
         returns:
             list[GetFirmwareInfoResponse]: list of firmware info
@@ -52,7 +52,7 @@ class IFirmwareService(ABC):
     @abstractmethod
     async def update_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
         request_body: FirmwareInfoUpdateRequestBody,
     ) -> UpdateFirmwareInfoResponse:
@@ -60,7 +60,7 @@ class IFirmwareService(ABC):
         Update firmware
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             firmware_id (UUID): firmware id
             request_body (CreateFirmwareRequestBody): request body
 
@@ -71,14 +71,14 @@ class IFirmwareService(ABC):
     @abstractmethod
     async def create_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         request_body: CreateFirmwareInfoRequestBody,
     ) -> CreateFirmwareInfoResponse:
         """
         Create firmware
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             request_body (CreateFirmwareRequestBody): request body
 
         returns:
@@ -92,21 +92,29 @@ class FirmwareService(IFirmwareService):
 
     async def get_firmware_info(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
     ) -> GetFirmwareInfoResponse:
         return await self.firmware_repo.get_firmware_by_id(
-            company_id=user_id,
+            company_id=company_id,
             firmware_id=firmware_id,
         )
 
     async def get_firmware_list(
-        self, user_id: UUID, query_params: GetFirmwareInfoQueryParams
+        self, company_id: UUID, query_params: GetFirmwareInfoQueryParams
     ) -> Page[GetFirmwareInfoResponse]:
+        limit = query_params.size
+        offset = (query_params.page - 1) * limit
+
         firmware_list = await self.firmware_repo.get_firmware_list(
-            company_id=user_id,
-            query_params=query_params,
+            company_id=company_id,
+            offset=offset,
+            limit=limit,
+            type_id=query_params.type_id,
+            name=query_params.name,
+            version=query_params.version,
         )
+
         return Page.create(
             items=firmware_list,
             params=query_params,
@@ -115,12 +123,12 @@ class FirmwareService(IFirmwareService):
 
     async def update_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
         request_body: FirmwareInfoUpdateRequestBody,
     ) -> UpdateFirmwareInfoResponse:
         return await self.firmware_repo.update_firmware(
-            company_id=user_id,
+            company_id=company_id,
             firmware_id=firmware_id,
             name=request_body.name,
             description=request_body.description,
@@ -129,11 +137,11 @@ class FirmwareService(IFirmwareService):
 
     async def create_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         request_body: CreateFirmwareInfoRequestBody,
     ) -> CreateFirmwareInfoResponse:
         return await self.firmware_repo.create_firmware(
-            company_id=user_id,
+            company_id=company_id,
             name=request_body.name,
             description=request_body.description,
             version=request_body.version,
