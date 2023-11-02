@@ -30,7 +30,7 @@ class Tag(CompanyMixin, UUIDMixin, TimeStampedMixin, BaseModel):
     color: Mapped[str] = mapped_column(String(10), nullable=True)
 
     devices: Mapped[list["Device"]] = relationship(
-        secondary=device_tag_lookup, back_populates="tags", lazy="joined"
+        secondary=device_tag_lookup, back_populates="tags"
     )
 
     def __repr__(self) -> str:

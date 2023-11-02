@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from calypte_api.common.dependencies import DBSessionType
+from calypte_api.tags.models import Tag
 from calypte_api.tags.schemas import (
     CreateTagResponse,
-    GetTagQueryParams,
     GetTagResponse,
     UpdateTagResponse,
 )
 
 from fastapi import Depends
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -33,7 +33,7 @@ class ITagRepo(ABC):
 
     @abstractmethod
     async def get_tags(
-        self, user_id: UUID, query_params: GetTagQueryParams
+        self, user_id: UUID, limit: int, offset: int, name: str | None
     ) -> list[GetTagResponse]:
         """
         Get tags by query params
@@ -46,10 +46,10 @@ class ITagRepo(ABC):
     @abstractmethod
     async def create_tag(
         self,
-        name: str,
+        company_id: UUID,
         type_id: UUID,
-        devices_ids: list[UUID],
-        user_id: UUID,
+        color: str,
+        name: str,
     ) -> CreateTagResponse:
         """
         Create tag
@@ -62,7 +62,11 @@ class ITagRepo(ABC):
 
     @abstractmethod
     async def update_tag(
-        self, user_id: UUID, tag_id: UUID, name: str, devices_ids: list[UUID]
+        self,
+        company_id: UUID,
+        tag_id: UUID,
+        color: str,
+        name: str,
     ) -> UpdateTagResponse:
         """
         Update tag
@@ -85,27 +89,19 @@ class ITagRepo(ABC):
         """
 
     @abstractmethod
-    async def check_tags_belongs_to_company(
-        self, company_id: UUID, tags: list[UUID]
+    async def check_tags_belongs_to(
+        self,
+        tags: list[UUID],
+        company_id: UUID | None = None,
+        type_id: UUID | None = None,
     ) -> None:
         """
-        Check that tags belongs to company
+        Check tags belongs to company or type
 
         Args:
-            company_id (UUID): user id
             tags (list[UUID]): tags
-        """
-
-    @abstractmethod
-    async def check_tags_belongs_to_type(
-        self, type_id: UUID, tags: list[UUID]
-    ):
-        """
-        Check that tags belongs to type
-
-        Args:
+            company_id (UUID): company id
             type_id (UUID): type id
-            tags (list[UUID]): tags
         """
 
 
@@ -113,70 +109,108 @@ class TagRepo(ITagRepo):
     def __init__(self, db_session: AsyncSession) -> None:
         self.db_session = db_session
 
-    # TODO: implement
     async def get_tag_by_id(
         self,
-        user_id: UUID,
+        company_id: UUID,
         tag_id: UUID,
-    ) -> GetTagResponse:
-        return GetTagResponse(
-            id=tag_id,
-            type_id=uuid4(),
-            device_id=[uuid4(), uuid4(), uuid4()],
-            name="mocked tag name",
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+    ) -> GetTagResponse | None:
+        select_stmt = (
+            select(Tag)
+            .where(Tag.id == tag_id)
+            .where(Tag.company_id == company_id)
         )
+        tag_model = await self.db_session.scalar(select_stmt)
 
-    # TODO: implement
+        if not tag_model:
+            return None
+
+        return GetTagResponse.model_validate(tag_model)
+
     async def get_tags(
-        self, user_id: UUID, query_params: GetTagQueryParams
+        self,
+        company_id: UUID,
+        limit: int,
+        offset: int,
+        type_id: UUID | None,
+        name: str | None,
     ) -> list[GetTagResponse]:
-        return [
-            GetTagResponse(
-                id=uuid4(),
-                type_id=uuid4(),
-                device_id=[uuid4(), uuid4(), uuid4()],
-                name="mocked tag name 1",
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
-            for i in range(query_params.size)
-        ]
+        select_stmt = select(Tag).where(Tag.company_id == company_id)
+        if name:
+            select_stmt = select_stmt.where(Tag.name == name)
+        if type_id:
+            select_stmt = select_stmt.where(Tag.type_id == type_id)
 
-    # TODO: implement
+        select_stmt = (
+            select_stmt.limit(limit).offset(offset).order_by(Tag.created_at)
+        )
+        tags_models = await self.db_session.scalars(select_stmt)
+
+        tag_schemas = [
+            GetTagResponse.model_validate(tag_model)
+            for tag_model in tags_models
+        ]
+        return tag_schemas
+
     async def create_tag(
         self,
-        user_id: UUID,
+        company_id: UUID,
         type_id: UUID,
-        devices_ids: list[UUID],
+        color: str,
         name: str,
     ) -> CreateTagResponse:
-        return CreateTagResponse(
-            id=uuid4(),
-            type_id=type_id,
-            devices_ids=devices_ids,
-            name=name,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        insert_stmt = (
+            insert(Tag)
+            .values(
+                company_id=company_id,
+                type_id=type_id,
+                name=name,
+            )
+            .returning(Tag)
         )
+        tag_model = await self.db_session.scalar(insert_stmt)
+        return CreateTagResponse.model_validate(tag_model)
 
-    # TODO: implement
     async def update_tag(
-        self, user_id: UUID, tag_id: UUID, name: str, devices_ids: list[UUID]
+        self,
+        company_id: UUID,
+        tag_id: UUID,
+        color: str,
+        name: str,
     ) -> UpdateTagResponse:
-        return UpdateTagResponse(
-            id=tag_id,
-            type_id=uuid4(),
-            devices_ids=devices_ids,
-            name=name,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        update_stmt = (
+            update(Tag)
+            .where(Tag.id == tag_id)
+            .where(Tag.company_id == company_id)
+            .values(name=name, color=color)
+            .returning(Tag)
         )
 
-    # TODO: implement
-    async def delete_tag(self, user_id: UUID, tag_id: UUID) -> None:
-        return None
+        tag_model = await self.db_session.scalar(update_stmt)
+        return UpdateTagResponse.model_validate(tag_model)
+
+    async def delete_tag(self, company_id: UUID, tag_id: UUID) -> None:
+        delete_stmt = (
+            delete(Tag)
+            .where(Tag.id == tag_id)
+            .where(Tag.company_id == company_id)
+        )
+        await self.db_session.execute(delete_stmt)
+
+    async def check_tags_belongs_to(
+        self,
+        tags: list[UUID],
+        company_id: UUID | None = None,
+        type_id: UUID | None = None,
+    ) -> bool:
+        select_stmt = select(Tag).where(Tag.id.in_(tags))
+        if company_id:
+            select_stmt = select_stmt.where(Tag.company_id == company_id)
+        if type_id:
+            select_stmt = select_stmt.where(Tag.type_id == type_id)
+
+        tags_models = await self.db_session.scalars(select_stmt)
+
+        return len(tags_models.all()) == len(tags)
 
 
 def get_tag_repo(db_session: DBSessionType) -> ITagRepo:
