@@ -55,32 +55,3 @@ device_tag_lookup = Table(
         "device_id", "tag_id", name="uq_device_tag_lookup_device_id_tag_id"
     ),
 )
-
-
-# class DeviceFirmwareLookup(BaseModel, TimeStampedMixin, UUIDMixin):
-#     __tablename__ = "device_firmware_lookup"
-#     __table_args__ = (
-#         UniqueConstraint(
-#             "device_id",
-#             "firmware_info_id",
-#             name="uq_device_firmware_lookup_device_id_firmware_info_id",
-#         ),
-#     )
-
-#     device_id: Mapped[uuid.UUID] = mapped_column(
-#         UUID(as_uuid=True),
-#         ForeignKey("devices.id"),
-#         nullable=False,
-#     )
-#     firmware_info_id: Mapped[uuid.UUID | None] = mapped_column(
-#         UUID(as_uuid=True),
-#         ForeignKey("firmware_info.id"),
-#         nullable=False,
-#     )
-
-#     device: Mapped["Device"] = relationship(
-#         "Device", back_populates="firmware_info"
-#     )
-#     firmware_info: Mapped["FirmwareInfo"] = relationship(
-#         "FirmwareInfo", back_populates="devices"
-#     )
