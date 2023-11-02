@@ -19,40 +19,38 @@ from fastapi_pagination import Page
 class IDeviceService(ABC):
     @abstractmethod
     async def get_device(
-        self,
-        user_id: UUID,
-        device_id: UUID,
+        self, company_id: UUID, device_id: UUID
     ) -> GetDeviceResponse:
         """
         Get device by id
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             device_id (UUID): device id
 
         """
 
     @abstractmethod
     async def get_devices(
-        self, user_id: UUID, query_params: GetDeviceQueryParams
+        self, company_id: UUID, query_params: GetDeviceQueryParams
     ) -> Page[GetDeviceResponse]:
         """
         Get all devices
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
 
         """
 
     @abstractmethod
     async def create_device(
-        self, user_id: UUID, request_body: CreateDeviceRequestBody
+        self, company_id: UUID, request_body: CreateDeviceRequestBody
     ) -> CreateDeviceResponse:
         """
         Create device
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             request_body (CreateDeviceRequestBody): request body
 
         """
@@ -60,7 +58,7 @@ class IDeviceService(ABC):
     @abstractmethod
     async def update_device(
         self,
-        user_id: UUID,
+        company_id: UUID,
         device_id: UUID,
         request_body: UpdateDeviceRequestBody,
     ) -> UpdateDeviceResponse:
@@ -68,18 +66,18 @@ class IDeviceService(ABC):
         Update device
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             device_id (UUID): device id
             request_body (CreateDeviceRequestBody): request body
         """
 
     @abstractmethod
-    async def delete_device(self, user_id: UUID, device_id: UUID) -> None:
+    async def delete_device(self, company_id: UUID, device_id: UUID) -> None:
         """
         Delete device
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             device_id (UUID): device id
         """
 
@@ -90,18 +88,27 @@ class DeviceService(IDeviceService):
 
     async def get_device(
         self,
-        user_id: UUID,
+        company_id: UUID,
         device_id: UUID,
     ) -> GetDeviceResponse:
         return await self.device_repo.get_device_by_id(
-            company_id=user_id, device_id=device_id
+            company_id=company_id, device_id=device_id
         )
 
     async def get_devices(
-        self, user_id: UUID, query_params: GetDeviceQueryParams
+        self, company_id: UUID, query_params: GetDeviceQueryParams
     ) -> Page[GetDeviceResponse]:
+        limit = query_params.size
+        offset = (query_params.page - 1) * query_params.size
+
         devices = await self.device_repo.get_devices(
-            company_id=user_id, query_params=query_params
+            company_id=company_id,
+            limit=limit,
+            offset=offset,
+            tags=query_params.tags,
+            firmware_info_id=query_params.firmware_info_id,
+            type_id=query_params.type_id,
+            name=query_params.name,
         )
         return Page.create(
             items=devices,
@@ -110,28 +117,35 @@ class DeviceService(IDeviceService):
         )
 
     async def create_device(
-        self, user_id: UUID, request_body: CreateDeviceRequestBody
+        self, company_id: UUID, request_body: CreateDeviceRequestBody
     ) -> CreateDeviceResponse:
         return await self.device_repo.create_device(
-            company_id=user_id,
+            type_id=request_body.type_id,
+            company_id=company_id,
+            name=request_body.name,
+            description=request_body.description,
+            firmware_info_id=request_body.firmware_info_id,
             tags=request_body.tags,
         )
 
     async def update_device(
         self,
-        user_id: UUID,
+        company_id: UUID,
         device_id: UUID,
         request_body: UpdateDeviceRequestBody,
     ) -> UpdateDeviceResponse:
         return await self.device_repo.update_device(
-            company_id=user_id,
+            company_id=company_id,
             device_id=device_id,
             tags=request_body.tags,
+            description=request_body.description,
+            name=request_body.name,
+            firmware_info_id=request_body.firmware_info_id,
         )
 
-    async def delete_device(self, user_id: UUID, device_id: UUID) -> None:
+    async def delete_device(self, company_id: UUID, device_id: UUID) -> None:
         return await self.device_repo.delete_device(
-            company_id=user_id, device_id=device_id
+            company_id=company_id, device_id=device_id
         )
 
 
