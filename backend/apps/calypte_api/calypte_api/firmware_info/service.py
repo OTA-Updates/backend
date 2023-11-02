@@ -96,7 +96,7 @@ class FirmwareService(IFirmwareService):
         firmware_id: UUID,
     ) -> GetFirmwareInfoResponse:
         return await self.firmware_repo.get_firmware_by_id(
-            user_id=user_id,
+            company_id=user_id,
             firmware_id=firmware_id,
         )
 
@@ -104,7 +104,7 @@ class FirmwareService(IFirmwareService):
         self, user_id: UUID, query_params: GetFirmwareInfoQueryParams
     ) -> Page[GetFirmwareInfoResponse]:
         firmware_list = await self.firmware_repo.get_firmware_list(
-            user_id=user_id,
+            company_id=user_id,
             query_params=query_params,
         )
         return Page.create(
@@ -120,7 +120,7 @@ class FirmwareService(IFirmwareService):
         request_body: FirmwareInfoUpdateRequestBody,
     ) -> UpdateFirmwareInfoResponse:
         return await self.firmware_repo.update_firmware(
-            user_id=user_id,
+            company_id=user_id,
             firmware_id=firmware_id,
             name=request_body.name,
             description=request_body.description,
@@ -133,7 +133,7 @@ class FirmwareService(IFirmwareService):
         request_body: CreateFirmwareInfoRequestBody,
     ) -> CreateFirmwareInfoResponse:
         return await self.firmware_repo.create_firmware(
-            user_id=user_id,
+            company_id=user_id,
             name=request_body.name,
             description=request_body.description,
             version=request_body.version,

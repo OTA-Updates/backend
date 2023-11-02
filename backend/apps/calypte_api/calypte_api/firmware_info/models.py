@@ -18,7 +18,7 @@ class FirmwareInfo(BaseModel, CompanyMixin, TimeStampedMixin, UUIDMixin):
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     type_id: Mapped[Type] = mapped_column(
-        ForeignKey("types.id", ondelete="CASCADE")
+        ForeignKey("types.id", ondelete=None)
     )
 
     def __repr__(self) -> str:

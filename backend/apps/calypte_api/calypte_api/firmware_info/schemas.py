@@ -29,11 +29,12 @@ class GetFirmwareInfoQueryParams(BaseFirmwareRequestSchema, Params):
 
 
 class BaseFirmwareResponseSchema(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
 
 class UpdateFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
+    company_id: UUID
     type_id: UUID | None = Field(default=None)
 
     name: str
@@ -46,6 +47,7 @@ class UpdateFirmwareInfoResponse(BaseFirmwareResponseSchema):
 
 class CreateFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
+    company_id: UUID
     type_id: UUID | None = Field(default=None)
 
     name: str
@@ -58,6 +60,7 @@ class CreateFirmwareInfoResponse(BaseFirmwareResponseSchema):
 
 class GetFirmwareInfoResponse(BaseFirmwareResponseSchema):
     id: UUID
+    company_id: UUID
     type_id: UUID | None = Field(default=None)
 
     name: str

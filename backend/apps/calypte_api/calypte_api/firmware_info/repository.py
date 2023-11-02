@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from calypte_api.common.dependencies import DBSessionType
+from calypte_api.firmware_info.models import FirmwareInfo
 from calypte_api.firmware_info.schemas import (
     CreateFirmwareInfoResponse,
-    GetFirmwareInfoQueryParams,
     GetFirmwareInfoResponse,
     UpdateFirmwareInfoResponse,
 )
 
 from fastapi import Depends
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -19,7 +19,7 @@ class IFirmwareInfoRepo(ABC):
     @abstractmethod
     async def get_firmware_by_id(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
     ) -> GetFirmwareInfoResponse:
         """
@@ -33,7 +33,13 @@ class IFirmwareInfoRepo(ABC):
 
     @abstractmethod
     async def get_firmware_list(
-        self, user_id: UUID, query_params: GetFirmwareInfoQueryParams
+        self,
+        company_id: UUID,
+        limit: int,
+        offset: int,
+        type_id: UUID | None,
+        version: str | None,
+        name: str | None,
     ) -> list[GetFirmwareInfoResponse]:
         """
         Get firmware by query params
@@ -46,7 +52,7 @@ class IFirmwareInfoRepo(ABC):
     @abstractmethod
     async def update_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
         name: str,
         description: str,
@@ -65,7 +71,7 @@ class IFirmwareInfoRepo(ABC):
     @abstractmethod
     async def create_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         type_id: UUID,
         name: str,
         description: str,
@@ -81,27 +87,19 @@ class IFirmwareInfoRepo(ABC):
         """
 
     @abstractmethod
-    async def check_firmware_belongs_to_company(
-        self, company_id: UUID, firmware_id: UUID
-    ):
+    async def check_firmware_belongs_to(
+        self,
+        firmware_id: UUID,
+        type_id: UUID | None = None,
+        company_id: UUID | None = None,
+    ) -> bool:
         """
-        Check that firmware belongs to company
+        Check firmware belongs to type and/or company
 
         Args:
-            company_id (UUID): user id
             firmware_id (UUID): firmware id
-        """
-
-    @abstractmethod
-    async def check_firmware_belongs_to_type(
-        self, type_id: UUID, firmware_id: UUID
-    ):
-        """
-        Check that firmware belongs to type
-
-        Args:
             type_id (UUID): type id
-            firmware_id (UUID): firmware id
+            company_id (UUID): company id
         """
 
 
@@ -109,75 +107,121 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
     def __init__(self, db_session: AsyncSession) -> None:
         self.db_session = db_session
 
-    # TODO: implement
     async def get_firmware_by_id(
-        self,
-        user_id: UUID,
-        firmware_id: UUID,
+        self, company_id: UUID, firmware_id: UUID
     ) -> GetFirmwareInfoResponse:
-        return GetFirmwareInfoResponse(
-            id=firmware_id,
-            type_id=uuid4(),
-            name="mocked firmware name",
-            description="mocked firmware description",
-            version="mocked firmware version",
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        select_stmt = (
+            select(FirmwareInfo)
+            .where(FirmwareInfo.company_id == company_id)
+            .where(FirmwareInfo.id == firmware_id)
         )
+        firmware_info_model = await self.db_session.scalar(select_stmt)
 
-    # TODO: implement
+        return GetFirmwareInfoResponse.from_orm(firmware_info_model)
+
     async def get_firmware_list(
-        self, user_id: UUID, query_params: GetFirmwareInfoQueryParams
+        self,
+        company_id: UUID,
+        limit: int,
+        offset: int,
+        type_id: UUID | None,
+        version: str | None,
+        name: str | None,
     ) -> list[GetFirmwareInfoResponse]:
-        return [
-            GetFirmwareInfoResponse(
-                id=uuid4(),
-                type_id=uuid4(),
-                name="mocked firmware name",
-                description="mocked firmware description",
-                version="mocked firmware version",
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
-            for i in range(query_params.size)
+        select_stmt = select(FirmwareInfo).where(
+            FirmwareInfo.company_id == company_id
+        )
+        if type_id:
+            select_stmt = select_stmt.where(FirmwareInfo.type_id == type_id)
+        if name:
+            select_stmt = select_stmt.where(FirmwareInfo.name == name)
+        if version:
+            select_stmt = select_stmt.where(FirmwareInfo.version == version)
+
+        select_stmt = (
+            select_stmt.order_by(FirmwareInfo.created_at)
+            .limit(limit=limit)
+            .offset(offset=offset)
+        )
+        firmware_info_models = await self.db_session.scalars(select_stmt)
+
+        firmware_info_schemas = [
+            GetFirmwareInfoResponse.model_validate(firmware_info)
+            for firmware_info in firmware_info_models
         ]
 
-    # TODO: implement
+        return firmware_info_schemas
+
     async def update_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
         name: str,
         description: str,
         version: str,
     ) -> UpdateFirmwareInfoResponse:
-        return UpdateFirmwareInfoResponse(
-            id=firmware_id,
-            type_id=uuid4(),
-            name=name,
-            description=description,
-            version=version,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        update_stmt = (
+            update(FirmwareInfo)
+            .where(firmware_id == FirmwareInfo.id)
+            .where(FirmwareInfo.company_id == company_id)
+            .values(
+                {
+                    FirmwareInfo.name: name,
+                    FirmwareInfo.description: description,
+                    FirmwareInfo.version: version,
+                }
+            )
+            .returning(FirmwareInfo)
         )
+        firmware_info_model = await self.db_session.scalar(update_stmt)
+
+        return UpdateFirmwareInfoResponse.model_validate(firmware_info_model)
 
     async def create_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         type_id: UUID,
         name: str,
         description: str,
         version: str,
     ) -> CreateFirmwareInfoResponse:
-        return CreateFirmwareInfoResponse(
-            id=uuid4(),
-            type_id=type_id,
-            name=name,
-            description=description,
-            version=version,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+        create_stmt = (
+            insert(FirmwareInfo)
+            .values(
+                {
+                    FirmwareInfo.company_id: company_id,
+                    FirmwareInfo.type_id: type_id,
+                    FirmwareInfo.name: name,
+                    FirmwareInfo.description: description,
+                    FirmwareInfo.version: version,
+                }
+            )
+            .returning(FirmwareInfo)
         )
+
+        firmware_info_model = await self.db_session.scalar(create_stmt)
+
+        return CreateFirmwareInfoResponse.model_validate(firmware_info_model)
+
+    async def check_firmware_belongs_to(
+        self,
+        firmware_id: UUID,
+        type_id: UUID | None = None,
+        company_id: UUID | None = None,
+    ) -> bool:
+        select_stmt = select(FirmwareInfo).where(
+            FirmwareInfo.id == firmware_id
+        )
+        if type_id:
+            select_stmt = select_stmt.where(FirmwareInfo.type_id == type_id)
+        if company_id:
+            select_stmt = select_stmt.where(
+                FirmwareInfo.company_id == company_id
+            )
+        select_stmt = select_stmt
+
+        firmware_info_model = await self.db_session.scalar(select_stmt)
+        return bool(firmware_info_model)
 
 
 def get_firmware_info_repo(db_session: DBSessionType) -> IFirmwareInfoRepo:
