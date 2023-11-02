@@ -19,7 +19,7 @@ class ITagRepo(ABC):
     @abstractmethod
     async def get_tag_by_id(
         self,
-        user_id: UUID,
+        company_id: UUID,
         tag_id: UUID,
     ) -> GetTagResponse:
         """
@@ -27,19 +27,19 @@ class ITagRepo(ABC):
 
         Args:
             tag_id (UUID): tag id
-            user_id (UUID): user id
+            company_id (UUID): user id
 
         """
 
     @abstractmethod
     async def get_tags(
-        self, user_id: UUID, limit: int, offset: int, name: str | None
+        self, company_id: UUID, limit: int, offset: int, name: str | None
     ) -> list[GetTagResponse]:
         """
         Get tags by query params
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             query_params (GetTagQueryParams): query params
         """
 
@@ -55,7 +55,7 @@ class ITagRepo(ABC):
         Create tag
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             name (str): tag name
             tags (list[UUID]): tag tags
         """
@@ -72,19 +72,19 @@ class ITagRepo(ABC):
         Update tag
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             tag_id (UUID): tag id
             name (str): tag name
             tags (list[UUID]): tag tags
         """
 
     @abstractmethod
-    async def delete_tag(self, user_id: UUID, tag_id: UUID) -> None:
+    async def delete_tag(self, company_id: UUID, tag_id: UUID) -> None:
         """
         Delete tag
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             tag_id (UUID): tag id
         """
 

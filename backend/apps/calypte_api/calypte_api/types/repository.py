@@ -19,7 +19,7 @@ class ITypeRepo(ABC):
     @abstractmethod
     async def get_type_by_id(
         self,
-        user_id: UUID,
+        company_id: UUID,
         type_id: UUID,
     ) -> GetTypeResponse:
         """
@@ -27,7 +27,7 @@ class ITypeRepo(ABC):
 
         Args:
             type_id (UUID): type id
-            user_id (UUID): user id
+            company_id (UUID): user id
 
         """
 
@@ -39,14 +39,14 @@ class ITypeRepo(ABC):
         Get types by query params
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             query_params (GetTypeQueryParams): query params
         """
 
     @abstractmethod
     async def create_type(
         self,
-        user_id: UUID,
+        company_id: UUID,
         name: str,
         description: str | None,
     ) -> CreateTypeResponse:
@@ -54,32 +54,36 @@ class ITypeRepo(ABC):
         Create type
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             name (str): type name
             description (str | None): type description
         """
 
     @abstractmethod
     async def update_type(
-        self, user_id: UUID, type_id: UUID, name: str, description: str | None
+        self,
+        company_id: UUID,
+        type_id: UUID,
+        name: str,
+        description: str | None,
     ) -> UpdateTypeResponse:
         """
         Update type
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             type_id (UUID): type id
             name (str): type name
             description (str | None): type description
         """
 
     @abstractmethod
-    async def delete_type(self, user_id: UUID, type_id: UUID) -> None:
+    async def delete_type(self, company_id: UUID, type_id: UUID) -> None:
         """
         Delete type
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             type_id (UUID): type id
         """
 
