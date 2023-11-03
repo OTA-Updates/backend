@@ -21,7 +21,7 @@ class IFirmwareInfoRepo(ABC):
         self,
         company_id: UUID,
         firmware_id: UUID,
-    ) -> GetFirmwareInfoResponse:
+    ) -> GetFirmwareInfoResponse | None:
         """
         Get firmware by id
 
@@ -37,6 +37,7 @@ class IFirmwareInfoRepo(ABC):
         company_id: UUID,
         limit: int,
         offset: int,
+        serial_number: str | None,
         type_id: UUID | None,
         version: str | None,
         name: str | None,
@@ -45,8 +46,13 @@ class IFirmwareInfoRepo(ABC):
         Get firmware by query params
 
         Args:
-            user_id (UUID): user id
-            query_params (GetFirmwareQueryParams): query params
+            company_id (UUID): user id
+            limit (int): limit
+            offset (int): offset
+            serial_number (str): firmware serial number
+            type_id (UUID): type id
+            version (str): firmware version
+            name (str): firmware name
         """
 
     @abstractmethod
@@ -54,6 +60,7 @@ class IFirmwareInfoRepo(ABC):
         self,
         company_id: UUID,
         firmware_id: UUID,
+        serial_number: str,
         name: str,
         description: str,
         version: str,
@@ -62,10 +69,12 @@ class IFirmwareInfoRepo(ABC):
         Update firmware
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             firmware_id (UUID): firmware id
+            serial_number (str): firmware serial number
             name (str): firmware name
             description (str): firmware description
+            version (str): firmware version
         """
 
     @abstractmethod
@@ -73,6 +82,7 @@ class IFirmwareInfoRepo(ABC):
         self,
         company_id: UUID,
         type_id: UUID,
+        serial_number: str,
         name: str,
         description: str,
         version: str,
@@ -81,9 +91,12 @@ class IFirmwareInfoRepo(ABC):
         Create firmware
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
+            type_id (UUID): type id
+            serial_number (str): firmware serial number
             name (str): firmware name
             description (str): firmware description
+            version (str): firmware version
         """
 
     @abstractmethod
@@ -109,21 +122,24 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
 
     async def get_firmware_by_id(
         self, company_id: UUID, firmware_id: UUID
-    ) -> GetFirmwareInfoResponse:
+    ) -> GetFirmwareInfoResponse | None:
         select_stmt = (
             select(FirmwareInfo)
             .where(FirmwareInfo.company_id == company_id)
             .where(FirmwareInfo.id == firmware_id)
         )
         firmware_info_model = await self.db_session.scalar(select_stmt)
+        if firmware_info_model is None:
+            return None
 
-        return GetFirmwareInfoResponse.from_orm(firmware_info_model)
+        return GetFirmwareInfoResponse.model_validate(firmware_info_model)
 
     async def get_firmware_list(
         self,
         company_id: UUID,
         limit: int,
         offset: int,
+        serial_number: str | None,
         type_id: UUID | None,
         version: str | None,
         name: str | None,
@@ -131,6 +147,10 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
         select_stmt = select(FirmwareInfo).where(
             FirmwareInfo.company_id == company_id
         )
+        if serial_number:
+            select_stmt = select_stmt.where(
+                FirmwareInfo.serial_number == serial_number
+            )
         if type_id:
             select_stmt = select_stmt.where(FirmwareInfo.type_id == type_id)
         if name:
@@ -156,16 +176,18 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
         self,
         company_id: UUID,
         firmware_id: UUID,
+        serial_number: str,
         name: str,
         description: str,
         version: str,
     ) -> UpdateFirmwareInfoResponse:
         update_stmt = (
             update(FirmwareInfo)
-            .where(firmware_id == FirmwareInfo.id)
+            .where(FirmwareInfo.id == firmware_id)
             .where(FirmwareInfo.company_id == company_id)
             .values(
                 {
+                    FirmwareInfo.serial_number: serial_number,
                     FirmwareInfo.name: name,
                     FirmwareInfo.description: description,
                     FirmwareInfo.version: version,
@@ -175,12 +197,14 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
         )
         firmware_info_model = await self.db_session.scalar(update_stmt)
 
+        await self.db_session.commit()
         return UpdateFirmwareInfoResponse.model_validate(firmware_info_model)
 
     async def create_firmware(
         self,
         company_id: UUID,
         type_id: UUID,
+        serial_number: str,
         name: str,
         description: str,
         version: str,
@@ -191,6 +215,7 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
                 {
                     FirmwareInfo.company_id: company_id,
                     FirmwareInfo.type_id: type_id,
+                    FirmwareInfo.serial_number: serial_number,
                     FirmwareInfo.name: name,
                     FirmwareInfo.description: description,
                     FirmwareInfo.version: version,
@@ -201,6 +226,7 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
 
         firmware_info_model = await self.db_session.scalar(create_stmt)
 
+        await self.db_session.commit()
         return CreateFirmwareInfoResponse.model_validate(firmware_info_model)
 
     async def check_firmware_belongs_to(

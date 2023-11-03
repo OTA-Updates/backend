@@ -44,6 +44,7 @@ async def test_firm_info_data(
                 "company_id": type_obj["company_id"],
                 "type_id": type_obj["id"],
                 "name": f"test name {i}",
+                "serial_number": f"test serial number {i}",
                 "description": f"test firmware description {i}",
                 "version": "v1.0.0",
                 "created_at": datetime.now(),
@@ -73,14 +74,15 @@ async def test_get_firm_info_by_id(
 
 
 @pytest.mark.parametrize(
-    "limit, offset, name, type_id_filter, version_filter",
+    "limit, offset, name, serial_number, type_id_filter, version_filter",
     [
-        (5, 1, None, False, False),
-        (5, 0, None, False, False),
-        (5, 1, "test firmware", False, False),
-        (5, 1, None, True, False),
-        (5, 1, None, False, True),
-        (5, 1, "test firmware", True, True),
+        (5, 1, None, None, False, False),
+        (5, 0, None, None, False, False),
+        (5, 1, "test firmware", None, False, False),
+        (5, 1, None, "test serial number", False, False),
+        (5, 1, None, None, True, False),
+        (5, 1, None, None, False, True),
+        (5, 1, "test firmware", "test serial number", True, True),
     ],
 )
 async def test_get_firm_info(
@@ -89,6 +91,7 @@ async def test_get_firm_info(
     limit: int,
     offset: int,
     name: str | None,
+    serial_number: str | None,
     type_id_filter: bool,
     version_filter: bool,
 ) -> None:
@@ -105,6 +108,7 @@ async def test_get_firm_info(
     firm_info_objects = await firm_info_repo.get_firmware_list(
         company_id=command_id,
         type_id=type_id,
+        serial_number=serial_number,
         name=name,
         version=version,
         limit=limit,
@@ -116,6 +120,10 @@ async def test_get_firm_info(
         for firm_info_data in test_firm_info_data
         if (firm_info_data["company_id"] == command_id)
         and (name is None or firm_info_data["name"] == name)
+        and (
+            serial_number is None
+            or firm_info_data["serial_number"] == serial_number
+        )
         and (type_id is None or firm_info_data["type_id"] == type_id)
     ]
 
@@ -140,6 +148,7 @@ async def test_get_firm_info(
         {
             "name": "test name",
             "description": "test description",
+            "serial_number": "test serial number",
             "version": "v1.0.0",
             "company_id": uuid4(),
         }
@@ -169,6 +178,7 @@ async def test_create_firm_info(
         {
             "name": "test name",
             "description": "test description",
+            "serial_number": "test serial number",
             "version": "v1.0.0",
         }
     ],

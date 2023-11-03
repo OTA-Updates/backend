@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated
 from uuid import UUID
 
+from calypte_api.common.exeptions import ObjectNotFoundError
 from calypte_api.tags.repository import ITagRepo, TagRepositoryType
 from calypte_api.tags.schemas import (
     CreateTagRequestBody,
@@ -93,10 +94,15 @@ class TagService(ITagService):
         company_id: UUID,
         tag_id: UUID,
     ) -> GetTagResponse:
-        return await self.tag_repo.get_tag_by_id(
+        tag_schema = await self.tag_repo.get_tag_by_id(
             company_id=company_id,
             tag_id=tag_id,
         )
+
+        if not tag_schema:
+            raise ObjectNotFoundError(object_id=tag_id)
+
+        return tag_schema
 
     async def get_tags(
         self, company_id: UUID, query_params: GetTagQueryParams

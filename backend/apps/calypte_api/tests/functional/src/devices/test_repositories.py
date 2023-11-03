@@ -63,6 +63,7 @@ async def test_device_data(
                 "company_id": type_obj["company_id"],
                 "type_id": type_obj["id"],
                 "name": f"test name {i}",
+                "serial_number": f"test serial number {i}",
                 "description": f"test firmware description {i}",
                 "version": "v1.0.0",
                 "created_at": datetime.now(),
@@ -80,7 +81,8 @@ async def test_device_data(
                 "id": uuid4(),
                 "company_id": type_obj["company_id"],
                 "type_id": type_obj["id"],
-                "firmware_info_id": firmware_obj["id"],
+                "serial_number": f"serial number {i}",
+                "current_firmware_id": firmware_obj["id"],
                 "registered_at": random.choice([datetime.now(), None]),
                 "name": f"test name {i}",
                 "description": f"test description {i}",
@@ -118,6 +120,7 @@ async def test_get_device_by_id(
         company_id=expected_device["company_id"],
         device_id=expected_device["id"],
     )
+    assert device_object is not None
     assert device_object.id == expected_device["id"]
     assert device_object.name == expected_device["name"]
     assert device_object.description == expected_device["description"]
@@ -125,19 +128,22 @@ async def test_get_device_by_id(
     assert device_object.company_id == expected_device["company_id"]
     assert device_object.type_id == expected_device["type_id"]
     assert (
-        device_object.firmware_info_id == expected_device["firmware_info_id"]
+        device_object.current_firmware_id
+        == expected_device["current_firmware_id"]
     )
 
 
 @pytest.mark.parametrize(
-    "limit, offset, name, type_id_filter, tags_filter, firmware_info_filter",
+    "limit, offset, name, serial_number, type_id_filter, tags_filter, firmware_info_filter",  # noqa
     [
-        (5, 1, None, False, False, False),
-        (5, 0, "test name 1", False, False, False),
-        (5, 0, None, True, False, False),
-        (5, 0, None, False, True, False),
-        (5, 0, None, False, False, True),
-        (5, 0, "test name 1", True, True, True),
+        (5, 1, None, None, False, False, False),
+        (5, 0, "test name 1", None, False, False, False),
+        (5, 0, None, "serial number 1", False, False, False),
+        (5, 0, "test name 1", None, False, False, False),
+        (5, 0, None, None, True, False, False),
+        (5, 0, None, None, False, True, False),
+        (5, 0, None, None, False, False, True),
+        (5, 0, "test name 1", "serial number", True, True, True),
     ],
 )
 async def test_get_devices(
@@ -146,6 +152,7 @@ async def test_get_devices(
     limit: int,
     offset: int,
     name: str | None,
+    serial_number: str | None,
     type_id_filter: bool,
     tags_filter: bool,
     firmware_info_filter: bool,
@@ -153,19 +160,20 @@ async def test_get_devices(
     command_id = test_device_data[0]["company_id"]
     type_id = None
     tags = None
-    firmware_info_id = None
+    current_firmware_id = None
 
     if type_id_filter:
         type_id = test_device_data[0]["type_id"]
     if tags_filter:
         tags = test_device_data[0]["tags"][:1]
     if firmware_info_filter:
-        firmware_info_id = test_device_data[0]["firmware_info_id"]
+        current_firmware_id = test_device_data[0]["current_firmware_id"]
 
     device_objects = await device_repo.get_devices(
         company_id=command_id,
+        serial_number=serial_number,
         type_id=type_id,
-        firmware_info_id=firmware_info_id,
+        current_firmware_id=current_firmware_id,
         name=name,
         tags=tags,
         limit=limit,
@@ -176,12 +184,16 @@ async def test_get_devices(
         device_data
         for device_data in test_device_data
         if (device_data["company_id"] == command_id)
-        and (name is None or device_data["name"] == name)
+        and (name is None or device_data["name"] in name)
+        and (
+            serial_number is None
+            or device_data["serial_number"] == serial_number
+        )
         and (type_id is None or device_data["type_id"] == type_id)
         and (tags is None or set(tags).issubset(device_data["tags"]))
         and (
-            firmware_info_id is None
-            or device_data["firmware_info_id"] == firmware_info_id
+            current_firmware_id is None
+            or device_data["current_firmware_id"] == current_firmware_id
         )
     ]
 
@@ -205,6 +217,7 @@ async def test_get_devices(
             "name": "test name",
             "description": "test description",
             "company_id": uuid4(),
+            "serial_number": "serial number",
         }
     ],
 )
@@ -219,7 +232,6 @@ async def test_create_device(
         **device,
         "type_id": expected_device["type_id"],
         "tags": expected_device["tags"],
-        "firmware_info_id": expected_device["firmware_info_id"],
     }
 
     device_object = await device_repo.create_device(**new_device)
@@ -234,6 +246,7 @@ async def test_create_device(
         {
             "name": "test name",
             "description": "test description",
+            "serial_number": "serial number",
         }
     ],
 )
@@ -246,10 +259,9 @@ async def test_update_device(
 
     new_device = {
         **device,
-        "company_id": expected_device["company_id"],  # type: ignore
+        "company_id": expected_device["company_id"],
         "device_id": expected_device["id"],
         "tags": expected_device["tags"],
-        "firmware_info_id": expected_device["firmware_info_id"],
     }
 
     device_object = await device_repo.update_device(**new_device)

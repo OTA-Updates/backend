@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from calypte_api.common import databases
+from calypte_api.common.models import BaseModel
 from calypte_api.common.settings import get_settings
 from calypte_api.devices.api.v1.routers import router as devices_router
 from calypte_api.firmware.api.v1.routers import router as firmware_router
@@ -21,9 +22,13 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.schema import CreateSchema
 
 
 settings = get_settings()
+
+# TODO: commit in all repos
+# TODO:
 
 
 @asynccontextmanager
@@ -36,6 +41,17 @@ async def lifespan(app: FastAPI):
     )
     databases.redis = aioredis.from_url(settings.redis_dsn(), encoding="utf-8")
     await FastAPILimiter.init(databases.redis)
+
+    if settings.debug:
+        async with databases.engine.begin() as conn:
+            await conn.execute(
+                CreateSchema(
+                    settings.postgres_schema,
+                    if_not_exists=True,
+                ),
+            )
+            await conn.run_sync(BaseModel.metadata.drop_all)
+            await conn.run_sync(BaseModel.metadata.create_all)
 
     yield
 

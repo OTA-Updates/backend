@@ -28,10 +28,10 @@ async def create_tag(
     _: RateLimiterType,
     create_tag_request_body: tags_schemas.CreateTagRequestBody,
     tag_service: TagServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> tags_schemas.CreateTagResponse:
     return await tag_service.create_tag(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         request_body=create_tag_request_body,
     )
 
@@ -47,13 +47,13 @@ async def create_tag(
 async def get_tags_page(
     _: RateLimiterType,
     tag_service: TagServiceType,
-    query_params: tags_schemas.GetTagQueryParams = Depends(
+    query_params: tags_schemas.GetTagQueryParams = Depends(  # noqa B008
         tags_schemas.GetTagQueryParams
     ),
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[tags_schemas.GetTagResponse]:
     return await tag_service.get_tags(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         query_params=query_params,
     )
 
@@ -70,10 +70,10 @@ async def get_tag(
     _: RateLimiterType,
     tag_id: UUID,
     tag_service: TagServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> tags_schemas.GetTagResponse:
     return await tag_service.get_tag(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         tag_id=tag_id,
     )
 
@@ -91,10 +91,10 @@ async def update_tag(
     tag_id: UUID,
     update_tag_request_body: tags_schemas.UpdateTagRequestBody,
     tag_service: TagServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> tags_schemas.UpdateTagResponse:
     return await tag_service.update_tag(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         tag_id=tag_id,
         request_body=update_tag_request_body,
     )
@@ -112,9 +112,9 @@ async def delete_tag(
     _: RateLimiterType,
     tag_id: UUID,
     tag_service: TagServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> None:
     await tag_service.delete_tag(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         tag_id=tag_id,
     )

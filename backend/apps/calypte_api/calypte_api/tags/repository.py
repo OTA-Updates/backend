@@ -21,7 +21,7 @@ class ITagRepo(ABC):
         self,
         company_id: UUID,
         tag_id: UUID,
-    ) -> GetTagResponse:
+    ) -> GetTagResponse | None:
         """
         Get tag by id
 
@@ -33,7 +33,12 @@ class ITagRepo(ABC):
 
     @abstractmethod
     async def get_tags(
-        self, company_id: UUID, limit: int, offset: int, name: str | None
+        self,
+        company_id: UUID,
+        limit: int,
+        offset: int,
+        type_id: UUID | None,
+        name: str | None,
     ) -> list[GetTagResponse]:
         """
         Get tags by query params
@@ -94,7 +99,7 @@ class ITagRepo(ABC):
         tags: list[UUID],
         company_id: UUID | None = None,
         type_id: UUID | None = None,
-    ) -> None:
+    ) -> bool:
         """
         Check tags belongs to company or type
 
@@ -164,10 +169,13 @@ class TagRepo(ITagRepo):
                 company_id=company_id,
                 type_id=type_id,
                 name=name,
+                color=color,
             )
             .returning(Tag)
         )
         tag_model = await self.db_session.scalar(insert_stmt)
+
+        await self.db_session.commit()
         return CreateTagResponse.model_validate(tag_model)
 
     async def update_tag(
@@ -186,6 +194,8 @@ class TagRepo(ITagRepo):
         )
 
         tag_model = await self.db_session.scalar(update_stmt)
+
+        await self.db_session.commit()
         return UpdateTagResponse.model_validate(tag_model)
 
     async def delete_tag(self, company_id: UUID, tag_id: UUID) -> None:
@@ -195,6 +205,7 @@ class TagRepo(ITagRepo):
             .where(Tag.company_id == company_id)
         )
         await self.db_session.execute(delete_stmt)
+        await self.db_session.commit()
 
     async def check_tags_belongs_to(
         self,

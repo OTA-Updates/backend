@@ -17,6 +17,10 @@ class FirmwareInfo(BaseModel, CompanyMixin, TimeStampedMixin, UUIDMixin):
     version: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
+    serial_number: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True
+    )
+
     type_id: Mapped[Type] = mapped_column(
         ForeignKey("types.id", ondelete=None)
     )

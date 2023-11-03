@@ -28,10 +28,10 @@ async def create_device(
     _: RateLimiterType,
     create_device_request_body: device_schemas.CreateDeviceRequestBody,
     device_service: DeviceServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> device_schemas.CreateDeviceResponse:
     return await device_service.create_device(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         request_body=create_device_request_body,
     )
 
@@ -47,13 +47,13 @@ async def create_device(
 async def retrieve_devices(
     _: RateLimiterType,
     device_service: DeviceServiceType,
-    query_params: device_schemas.GetDeviceQueryParams = Depends(
+    query_params: device_schemas.GetDeviceQueryParams = Depends(  # noqa B008
         device_schemas.GetDeviceQueryParams
     ),
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[device_schemas.GetDeviceResponse]:
     return await device_service.get_devices(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         query_params=query_params,
     )
 
@@ -70,10 +70,10 @@ async def retrieve_device(
     _: RateLimiterType,
     device_id: UUID,
     device_service: DeviceServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> device_schemas.GetDeviceResponse:
     return await device_service.get_device(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         device_id=device_id,
     )
 
@@ -91,10 +91,10 @@ async def update_device(
     device_id: UUID,
     update_device_request_body: device_schemas.UpdateDeviceRequestBody,
     device_service: DeviceServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> device_schemas.UpdateDeviceResponse:
     return await device_service.update_device(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         device_id=device_id,
         request_body=update_device_request_body,
     )
@@ -111,9 +111,9 @@ async def delete_device(
     _: RateLimiterType,
     device_id: UUID,
     device_service: DeviceServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> None:
     await device_service.delete_device(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         device_id=device_id,
     )

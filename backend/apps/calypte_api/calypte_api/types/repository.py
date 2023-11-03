@@ -21,7 +21,7 @@ class ITypeRepo(ABC):
         self,
         company_id: UUID,
         type_id: UUID,
-    ) -> GetTypeResponse:
+    ) -> GetTypeResponse | None:
         """
         Get type by id
 
@@ -159,10 +159,7 @@ class TypeRepo(ITypeRepo):
         result = await self.db_session.execute(insert_stmt)
         new_type = result.scalar_one()
 
-        # * I am not sure commit about the commit in the repo
-        # * It maybe make more sense to do it on higher level
-        # await self.db_session.commit()
-
+        await self.db_session.commit()
         return CreateTypeResponse.model_validate(new_type)
 
     async def update_type(
@@ -182,6 +179,7 @@ class TypeRepo(ITypeRepo):
         result = await self.db_session.execute(update_stmt)
         new_type = result.scalar_one()
 
+        await self.db_session.commit()
         return UpdateTypeResponse.model_validate(new_type)
 
     async def delete_type(self, company_id: UUID, type_id: UUID) -> None:
@@ -190,6 +188,8 @@ class TypeRepo(ITypeRepo):
             .where(Type.id == type_id)
             .where(Type.company_id == company_id)
         )
+
+        await self.db_session.commit()
         await self.db_session.execute(delete_stmt)
 
     async def check_type_belongs_to_company(

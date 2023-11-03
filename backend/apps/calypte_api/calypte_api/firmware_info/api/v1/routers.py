@@ -27,13 +27,13 @@ router = APIRouter()
 async def retrieve_firmware_list(
     _: RateLimiterType,
     firmware_info_service: FirmwareInfoServiceType,
-    query_params: firmware_schemas.GetFirmwareInfoQueryParams = Depends(
+    query_params: firmware_schemas.GetFirmwareInfoQueryParams = Depends(  # noqa B008
         firmware_schemas.GetFirmwareInfoQueryParams
     ),
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[firmware_schemas.GetFirmwareInfoResponse]:
     return await firmware_info_service.get_firmware_list(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         query_params=query_params,
     )
 
@@ -50,10 +50,10 @@ async def retrieve_firmware_info(
     _: RateLimiterType,
     firmware_id: UUID,
     firmware_info_service: FirmwareInfoServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> firmware_schemas.GetFirmwareInfoResponse:
     return await firmware_info_service.get_firmware_info(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         firmware_id=firmware_id,
     )
 
@@ -71,10 +71,10 @@ async def update_firmware_info(
     firmware_id: UUID,
     update_request_body: firmware_schemas.FirmwareInfoUpdateRequestBody,
     firmware_info_service: FirmwareInfoServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> firmware_schemas.GetFirmwareInfoResponse:
     return await firmware_info_service.update_firmware(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         firmware_id=firmware_id,
         request_body=update_request_body,
     )

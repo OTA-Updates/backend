@@ -28,10 +28,10 @@ async def create_type(
     _: RateLimiterType,
     create_type_request_body: type_schemas.CreateTypeRequestBody,
     type_service: TypeServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> type_schemas.CreateTypeResponse:
     return await type_service.create_type(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         request_body=create_type_request_body,
     )
 
@@ -47,13 +47,13 @@ async def create_type(
 async def retrieve_types(
     _: RateLimiterType,
     type_service: TypeServiceType,
-    query_params: type_schemas.GetTypeQueryParams = Depends(
+    query_params: type_schemas.GetTypeQueryParams = Depends(  # noqa B008
         type_schemas.GetTypeQueryParams
     ),
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[type_schemas.GetTypeResponse]:
     return await type_service.get_types(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         query_params=query_params,
     )
 
@@ -70,10 +70,10 @@ async def retrieve_type(
     _: RateLimiterType,
     type_id: UUID,
     type_service: TypeServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> type_schemas.GetTypeResponse:
     return await type_service.get_type(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         type_id=type_id,
     )
 
@@ -91,10 +91,10 @@ async def update_type(
     type_id: UUID,
     update_type_request_body: type_schemas.UpdateTypeRequestBody,
     type_service: TypeServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> type_schemas.UpdateTypeResponse:
     return await type_service.update_type(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         type_id=type_id,
         request_body=update_type_request_body,
     )
@@ -111,9 +111,9 @@ async def delete_type(
     _: RateLimiterType,
     type_id: UUID,
     type_service: TypeServiceType,
-    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
+    jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> None:
     await type_service.delete_type(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         type_id=type_id,
     )

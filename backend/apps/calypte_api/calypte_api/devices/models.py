@@ -25,8 +25,12 @@ class Device(CompanyMixin, UUIDMixin, TimeStampedMixin, BaseModel):
     type_id: Mapped[Type] = mapped_column(
         ForeignKey("types.id", ondelete="CASCADE")
     )
-    firmware_info_id: Mapped[FirmwareInfo] = mapped_column(
-        ForeignKey("firmware_info.id", ondelete=None)
+    current_firmware_id: Mapped[FirmwareInfo | None] = mapped_column(
+        ForeignKey("firmware_info.id", ondelete=None), nullable=True
+    )
+
+    serial_number: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True
     )
 
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated
 from uuid import UUID
 
+from calypte_api.common.exeptions import ObjectNotFoundError
 from calypte_api.types.repository import ITypeRepo, TypeRepositoryType
 from calypte_api.types.schemas import (
     CreateTypeRequestBody,
@@ -94,10 +95,15 @@ class TypeService(ITypeService):
         company_id: UUID,
         type_id: UUID,
     ) -> GetTypeResponse:
-        return await self.type_repo.get_type_by_id(
+        type_schema = await self.type_repo.get_type_by_id(
             company_id=company_id,
             type_id=type_id,
         )
+
+        if not type_schema:
+            raise ObjectNotFoundError(object_id=type_id)
+
+        return type_schema
 
     async def get_types(
         self, company_id: UUID, query_params: GetTypeQueryParams
