@@ -116,7 +116,10 @@ class TypeRepo(ITypeRepo):
         )
         types_models = await self.db_session.scalar(statement=select_stmt)
 
-        return types_models and GetTypeResponse.model_validate(types_models)
+        if types_models is None:
+            return None
+
+        return GetTypeResponse.model_validate(types_models)
 
     async def get_types(
         self, company_id: UUID, name: str | None, offset: int, limit: int
