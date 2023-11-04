@@ -1,6 +1,8 @@
 import http
 import time
 
+from uuid import UUID
+
 from calypte_api.common.settings import get_settings
 
 from fastapi import HTTPException, Request
@@ -13,7 +15,7 @@ settings = get_settings()
 
 
 class JwtUserSchema(BaseModel):
-    id: str
+    id: UUID
     role: str
 
 

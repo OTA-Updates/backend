@@ -8,7 +8,7 @@ from calypte_api.firmware.api.v1.routers import router as firmware_router
 from calypte_api.firmware_info.api.v1.routers import (
     router as firmware_info_router,
 )
-from calypte_api.tags.api.v1.routers import router as tags_router
+from calypte_api.groups.api.v1.routers import router as tags_router
 from calypte_api.types.api.v1.routers import router as types_router
 
 import uvicorn
@@ -27,8 +27,8 @@ from sqlalchemy.schema import CreateSchema
 
 settings = get_settings()
 
-# TODO: commit in all repos
-# TODO:
+# TODO: update db models/repos to the latest version
+# TODO: use filtration lib and pagination lib in repos instead of custom code
 
 
 @asynccontextmanager
@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
                     if_not_exists=True,
                 ),
             )
-            await conn.run_sync(BaseModel.metadata.drop_all)
+            # await conn.run_sync(BaseModel.metadata.drop_all)
             await conn.run_sync(BaseModel.metadata.create_all)
 
     yield
@@ -86,7 +86,7 @@ app.include_router(
 app.include_router(
     tags_router,
     prefix="/api/v1",
-    tags=["tags"],
+    tags=["groups"],
 )
 app.include_router(
     firmware_info_router,

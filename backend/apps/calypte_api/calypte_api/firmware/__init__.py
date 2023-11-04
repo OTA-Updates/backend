@@ -1,6 +1,6 @@
-from calypte_api.tags.models import Tag
+from calypte_api.groups.models import Group
 
 
 __all__ = [
-    "Tag",
+    "Group",
 ]

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated
 from uuid import UUID
 
-from calypte_api.common.exeptions import ObjectNotFoundError
+from calypte_api.common.exceptions import ObjectNotFoundError
 from calypte_api.firmware_info.repository import (
     FirmwareInfoRepositoryType,
     IFirmwareInfoRepo,
