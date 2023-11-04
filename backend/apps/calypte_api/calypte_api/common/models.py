@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from calypte_api.common.settings import get_settings
 
-from sqlalchemy import Column, ForeignKey, MetaData, Table, UniqueConstraint
+from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -43,15 +43,3 @@ class TimeStampedMixin:
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()
     )
-
-
-device_tag_lookup = Table(
-    "device_tag_lookup",
-    BaseModel.metadata,
-    Column("id", UUID(), primary_key=True, default=uuid.uuid4),
-    Column("device_id", UUID(), ForeignKey("devices.id", ondelete="CASCADE")),
-    Column("tag_id", UUID(), ForeignKey("tags.id", ondelete="CASCADE")),
-    UniqueConstraint(
-        "device_id", "tag_id", name="uq_device_tag_lookup_device_id_tag_id"
-    ),
-)

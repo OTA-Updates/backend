@@ -6,11 +6,10 @@ from uuid import uuid4
 import pytest
 import pytest_asyncio
 
-from calypte_api.common.models import device_tag_lookup
 from calypte_api.devices.models import Device
 from calypte_api.devices.repository import DeviceRepo
 from calypte_api.firmware_info.models import FirmwareInfo
-from calypte_api.tags.models import Tag
+from calypte_api.groups.models import Group
 from calypte_api.types.models import Type
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,22 +37,6 @@ async def test_device_data(
     ]
     await db_session.execute(insert(Type).values(type_values))
 
-    tag_values = []
-    for i in range(100):
-        type_obj = random.choice(type_values)
-        tag_values.append(
-            {
-                "id": uuid4(),
-                "company_id": type_obj["company_id"],
-                "type_id": type_obj["id"],
-                "name": f"test name {i}",
-                "color": "#000000",
-                "created_at": datetime.now(),
-                "updated_at": datetime.now(),
-            }
-        )
-    await db_session.execute(insert(Tag).values(tag_values))
-
     firmware_values = []
     for i in range(100):
         type_obj = random.choice(type_values)
@@ -72,40 +55,42 @@ async def test_device_data(
         )
     await db_session.execute(insert(FirmwareInfo).values(firmware_values))
 
+    group_values = []
+    for i in range(100):
+        firmware = random.choice(firmware_values)
+        group_values.append(
+            {
+                "id": uuid4(),
+                "company_id": firmware["company_id"],
+                "type_id": firmware["type_id"],
+                "name": f"test name {i}",
+                "assigned_firmware_id": firmware["id"],
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+        )
+    await db_session.execute(insert(Group).values(group_values))
+
     device_values = []
     for i in range(100):
-        type_obj = random.choice(type_values)
-        firmware_obj = random.choice(firmware_values)
+        firmware = random.choice(firmware_values)
+        group = random.choice(group_values)
         device_values.append(
             {
                 "id": uuid4(),
-                "company_id": type_obj["company_id"],
-                "type_id": type_obj["id"],
-                "serial_number": f"serial number {i}",
-                "current_firmware_id": firmware_obj["id"],
-                "registered_at": random.choice([datetime.now(), None]),
                 "name": f"test name {i}",
                 "description": f"test description {i}",
+                "serial_number": f"serial number {i}",
+                "company_id": firmware["company_id"],
+                "type_id": firmware["type_id"],
+                "current_firmware_id": firmware["id"],
+                "group_id": group["id"],
+                "registered_at": datetime.now(),
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
             }
         )
     await db_session.execute(insert(Device).values(device_values))
-
-    device_tag_values = []
-    for device in device_values:
-        tags_ids = {tag["id"] for tag in random.choices(tag_values, k=4)}
-        device["tags"] = list(tags_ids)
-        for tag_id in tags_ids:
-            device_tag_values.append(
-                {
-                    "device_id": device["id"],
-                    "tag_id": tag_id,
-                }
-            )
-    await db_session.execute(
-        insert(device_tag_lookup).values(device_tag_values)
-    )
 
     await db_session.commit()
     return device_values
@@ -134,7 +119,7 @@ async def test_get_device_by_id(
 
 
 @pytest.mark.parametrize(
-    "limit, offset, name, serial_number, type_id_filter, tags_filter, firmware_info_filter",  # noqa
+    "limit, offset, name, serial_number, type_id_filter, group_filter, firmware_info_filter",  # noqa
     [
         (5, 1, None, None, False, False, False),
         (5, 0, "test name 1", None, False, False, False),
@@ -154,18 +139,18 @@ async def test_get_devices(
     name: str | None,
     serial_number: str | None,
     type_id_filter: bool,
-    tags_filter: bool,
+    group_filter: bool,
     firmware_info_filter: bool,
 ) -> None:
     command_id = test_device_data[0]["company_id"]
     type_id = None
-    tags = None
+    group_id = None
     current_firmware_id = None
 
     if type_id_filter:
         type_id = test_device_data[0]["type_id"]
-    if tags_filter:
-        tags = test_device_data[0]["tags"][:1]
+    if group_filter:
+        group_id = test_device_data[0]["group_id"]
     if firmware_info_filter:
         current_firmware_id = test_device_data[0]["current_firmware_id"]
 
@@ -175,7 +160,7 @@ async def test_get_devices(
         type_id=type_id,
         current_firmware_id=current_firmware_id,
         name=name,
-        tags=tags,
+        group_id=group_id,
         limit=limit,
         offset=offset,
     )
@@ -190,14 +175,15 @@ async def test_get_devices(
             or device_data["serial_number"] == serial_number
         )
         and (type_id is None or device_data["type_id"] == type_id)
-        and (tags is None or set(tags).issubset(device_data["tags"]))
+        and (group_id is None or device_data["group_id"] == group_id)
         and (
             current_firmware_id is None
             or device_data["current_firmware_id"] == current_firmware_id
         )
     ]
 
-    expected_devices = expected_devices[offset : offset + limit]
+    end = offset + limit
+    expected_devices = expected_devices[offset:end]
     expected_devices.sort(key=lambda x: x["created_at"])
 
     assert len(device_objects) == len(expected_devices)
@@ -231,7 +217,7 @@ async def test_create_device(
     new_device = {
         **device,
         "type_id": expected_device["type_id"],
-        "tags": expected_device["tags"],
+        "group_id": expected_device["group_id"],
     }
 
     device_object = await device_repo.create_device(**new_device)
@@ -261,7 +247,7 @@ async def test_update_device(
         **device,
         "company_id": expected_device["company_id"],
         "device_id": expected_device["id"],
-        "tags": expected_device["tags"],
+        "group_id": expected_device["group_id"],
     }
 
     device_object = await device_repo.update_device(**new_device)

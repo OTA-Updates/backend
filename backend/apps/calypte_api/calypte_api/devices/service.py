@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated
 from uuid import UUID
 
-from calypte_api.common.exeptions import (
+from calypte_api.common.exceptions import (
     DatabaseError,
     ObjectNotFoundError,
     RepositoryError,
@@ -115,7 +115,7 @@ class DeviceService(IDeviceService):
             company_id=company_id,
             limit=limit,
             offset=offset,
-            tags=query_params.tags_list,
+            group_id=query_params.group_id,
             serial_number=query_params.serial_number,
             current_firmware_id=query_params.current_firmware_id,
             type_id=query_params.type_id,
@@ -137,7 +137,7 @@ class DeviceService(IDeviceService):
                 serial_number=request_body.serial_number,
                 name=request_body.name,
                 description=request_body.description,
-                tags=request_body.tags,
+                group_id=request_body.group_id,
             )
         except RepositoryError as e:
             raise DatabaseError(detail=str(e))
@@ -153,7 +153,7 @@ class DeviceService(IDeviceService):
                 company_id=company_id,
                 device_id=device_id,
                 serial_number=request_body.serial_number,
-                tags=request_body.tags,
+                group_id=request_body.group_id,
                 description=request_body.description,
                 name=request_body.name,
             )
@@ -161,9 +161,12 @@ class DeviceService(IDeviceService):
             raise DatabaseError(detail=str(e))
 
     async def delete_device(self, company_id: UUID, device_id: UUID) -> None:
-        return await self.device_repo.delete_device(
-            company_id=company_id, device_id=device_id
-        )
+        try:
+            return await self.device_repo.delete_device(
+                company_id=company_id, device_id=device_id
+            )
+        except RepositoryError as e:
+            raise DatabaseError(detail=str(e))
 
 
 def get_device_service(device_repo: DeviceRepositoryType) -> IDeviceService:
