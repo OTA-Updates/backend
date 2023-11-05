@@ -28,6 +28,9 @@ class Device(CompanyMixin, UUIDMixin, TimeStampedMixin, BaseModel):
     current_firmware_id: Mapped[FirmwareInfo | None] = mapped_column(
         ForeignKey("firmware_info.id", ondelete=None), nullable=True
     )
+    assigned_firmware_id: Mapped[FirmwareInfo] = mapped_column(
+        ForeignKey("firmware_info.id", ondelete=None), nullable=False
+    )
     group_id: Mapped[Group] = mapped_column(
         ForeignKey("groups.id", ondelete=None)
     )

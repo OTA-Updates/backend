@@ -34,7 +34,6 @@ class BaseGroupResponseSchema(BaseModel):
 
     company_id: UUID
     type_id: UUID
-    assigned_firmware_id: UUID | None
 
     created_at: datetime
     updated_at: datetime

@@ -129,7 +129,6 @@ class GroupService(IGroupService):
         return await self.group_repo.create_group(
             company_id=company_id,
             name=request_body.name,
-            assigned_firmware_id=request_body.assigned_firmware_id,
             type_id=request_body.type_id,
         )
 
@@ -143,7 +142,6 @@ class GroupService(IGroupService):
             company_id=company_id,
             group_id=group_id,
             name=request_body.name,
-            assigned_firmware_id=request_body.assigned_firmware_id,
         )
 
     async def delete_group(self, company_id: UUID, group_id: UUID) -> None:

@@ -20,6 +20,7 @@ class GetDeviceQueryParams(BaseDeviceRequestSchema, Params):
 class CreateDeviceRequestBody(BaseDeviceRequestSchema):
     name: str
     description: str | None
+    assigned_firmware_id: UUID
     type_id: UUID
     serial_number: str
     group_id: UUID
@@ -28,6 +29,7 @@ class CreateDeviceRequestBody(BaseDeviceRequestSchema):
 class UpdateDeviceRequestBody(BaseDeviceRequestSchema):
     name: str
     description: str | None
+    assigned_firmware_id: UUID
     serial_number: str
     group_id: UUID
 
@@ -46,6 +48,7 @@ class BaseDeviceResponseSchema(BaseModel):
     type_id: UUID
     group_id: UUID
     current_firmware_id: UUID | None
+    assigned_firmware_id: UUID
 
     created_at: datetime
     updated_at: datetime

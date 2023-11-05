@@ -53,7 +53,6 @@ class IGroupRepo(ABC):
         self,
         company_id: UUID,
         type_id: UUID,
-        assigned_firmware_id: UUID,
         name: str,
     ) -> CreateGroupResponse:
         """
@@ -71,7 +70,6 @@ class IGroupRepo(ABC):
         self,
         company_id: UUID,
         group_id: UUID,
-        assigned_firmware_id: UUID,
         name: str,
     ) -> UpdateGroupResponse:
         """
@@ -161,7 +159,6 @@ class GroupRepo(IGroupRepo):
         self,
         company_id: UUID,
         type_id: UUID,
-        assigned_firmware_id: UUID,
         name: str,
     ) -> CreateGroupResponse:
         insert_stmt = (
@@ -170,7 +167,6 @@ class GroupRepo(IGroupRepo):
                 company_id=company_id,
                 type_id=type_id,
                 name=name,
-                assigned_firmware_id=assigned_firmware_id,
             )
             .returning(Group)
         )
@@ -183,14 +179,13 @@ class GroupRepo(IGroupRepo):
         self,
         company_id: UUID,
         group_id: UUID,
-        assigned_firmware_id: UUID,
         name: str,
     ) -> UpdateGroupResponse:
         update_stmt = (
             update(Group)
             .where(Group.id == group_id)
             .where(Group.company_id == company_id)
-            .values(name=name, assigned_firmware_id=assigned_firmware_id)
+            .values(name=name)
             .returning(Group)
         )
 

@@ -1,53 +1,43 @@
-
-
 ```mermaid
 classDiagram
     class Type {
         + UUID id
         + String name
+        + String device_shared_key
     }
+
     class FirmwareInfo {
         + UUID id
         + UUID type_id
         + String name
         + String version
         + String description
+        + String serial_number
     }
-    class Tag {
+
+    class Group {
         + UUID id
         + UUID type_id
         + UUID device_lookup_id
-
+        + UUID Optional[assigned_firmware_id]
         + String name
+        + String description
     }
+
     class Device {
         + UUID id
         + UUID type_id
-        + UUID fimware_info_lookup_id
-        + UUID type_lookup_id
-        + UUID tag_lookup_id
-    }
-    class TagDeviceLookUp {
-        + UUID id
-        + UUID tag_id
-        + UUID device_id
-    }
-    class FimwareInfoDeviceLookup {
-        + UUID id
-        + UUID firmware_info_id
-        + UUID device_id
+        + UUID Optional[current_fimware_id]
+        + UUID group_id
 
-        + Datetime created_at
+        + String name
+        + String description
     }
 
     Type --* FirmwareInfo
-    Type --* Tag
+    Type --* Group
     Type --* Device
 
-    Device --* TagDeviceLookUp
-    Tag --* TagDeviceLookUp
-
-    Device --* FimwareInfoDeviceLookup
-    FirmwareInfo --* FimwareInfoDeviceLookup
-
+    Device --* Group
+    Device --* FirmwareInfo
 ```

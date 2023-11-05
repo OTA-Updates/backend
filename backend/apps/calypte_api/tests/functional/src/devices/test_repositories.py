@@ -57,14 +57,13 @@ async def test_device_data(
 
     group_values = []
     for i in range(100):
-        firmware = random.choice(firmware_values)
+        type_obj = random.choice(type_values)
         group_values.append(
             {
                 "id": uuid4(),
-                "company_id": firmware["company_id"],
-                "type_id": firmware["type_id"],
+                "company_id": type_obj["company_id"],
+                "type_id": type_obj["id"],
                 "name": f"test name {i}",
-                "assigned_firmware_id": firmware["id"],
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
             }
@@ -73,7 +72,9 @@ async def test_device_data(
 
     device_values = []
     for i in range(100):
-        firmware = random.choice(firmware_values)
+        type_obj = random.choice(type_values)
+        current_firmware = random.choice(firmware_values)
+        assigned_firmware = random.choice(firmware_values)
         group = random.choice(group_values)
         device_values.append(
             {
@@ -81,9 +82,10 @@ async def test_device_data(
                 "name": f"test name {i}",
                 "description": f"test description {i}",
                 "serial_number": f"serial number {i}",
-                "company_id": firmware["company_id"],
-                "type_id": firmware["type_id"],
-                "current_firmware_id": firmware["id"],
+                "company_id": type_obj["company_id"],
+                "type_id": type_obj["id"],
+                "current_firmware_id": current_firmware["id"],
+                "assigned_firmware_id": assigned_firmware["id"],
                 "group_id": group["id"],
                 "registered_at": datetime.now(),
                 "created_at": datetime.now(),
@@ -218,6 +220,7 @@ async def test_create_device(
         **device,
         "type_id": expected_device["type_id"],
         "group_id": expected_device["group_id"],
+        "assigned_firmware_id": expected_device["assigned_firmware_id"],
     }
 
     device_object = await device_repo.create_device(**new_device)
@@ -248,6 +251,7 @@ async def test_update_device(
         "company_id": expected_device["company_id"],
         "device_id": expected_device["id"],
         "group_id": expected_device["group_id"],
+        "assigned_firmware_id": expected_device["assigned_firmware_id"],
     }
 
     device_object = await device_repo.update_device(**new_device)

@@ -62,6 +62,7 @@ class IDeviceRepo(ABC):
         self,
         type_id: UUID,
         company_id: UUID,
+        assigned_firmware_id: UUID,
         name: str,
         serial_number: str,
         group_id: UUID,
@@ -73,6 +74,7 @@ class IDeviceRepo(ABC):
         Args:
             type_id (UUID): type id
             company_id (UUID): user id
+            assigned_firmware_id (UUID): assigned firmware id
             name (str): device name
             description (str | None): device description
             serial_number (str): device serial number
@@ -84,6 +86,7 @@ class IDeviceRepo(ABC):
         self,
         device_id: UUID,
         company_id: UUID,
+        assigned_firmware_id: UUID,
         group_id: UUID,
         serial_number: str,
         name: str,
@@ -95,6 +98,7 @@ class IDeviceRepo(ABC):
         Args:
             device_id (UUID): device id
             company_id (UUID): user id
+            assigned_firmware_id (UUID): assigned firmware id
             name (str): device name
             serial_number (str): device serial number
             group_id (UUID): group id
@@ -176,6 +180,7 @@ class DeviceRepo(IDeviceRepo):
         self,
         type_id: UUID,
         company_id: UUID,
+        assigned_firmware_id: UUID,
         name: str,
         serial_number: str,
         group_id: UUID,
@@ -184,14 +189,13 @@ class DeviceRepo(IDeviceRepo):
         insert_device_stmt = (
             insert(Device)
             .values(
-                {
-                    Device.type_id: type_id,
-                    Device.group_id: group_id,
-                    Device.name: name,
-                    Device.description: description,
-                    Device.company_id: company_id,
-                    Device.serial_number: serial_number,
-                }
+                type_id=type_id,
+                group_id=group_id,
+                assigned_firmware_id=assigned_firmware_id,
+                name=name,
+                description=description,
+                company_id=company_id,
+                serial_number=serial_number,
             )
             .returning(Device)
         )
@@ -209,6 +213,7 @@ class DeviceRepo(IDeviceRepo):
         self,
         device_id: UUID,
         company_id: UUID,
+        assigned_firmware_id: UUID,
         group_id: UUID,
         serial_number: str,
         name: str,
@@ -222,6 +227,7 @@ class DeviceRepo(IDeviceRepo):
                 id=device_id,
                 name=name,
                 description=description,
+                assigned_firmware_id=assigned_firmware_id,
                 group_id=group_id,
                 company_id=company_id,
                 serial_number=serial_number,

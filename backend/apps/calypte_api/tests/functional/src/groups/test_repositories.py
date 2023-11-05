@@ -6,7 +6,6 @@ from uuid import uuid4
 import pytest
 import pytest_asyncio
 
-from calypte_api.firmware_info.models import FirmwareInfo
 from calypte_api.groups.models import Group
 from calypte_api.groups.repository import GroupRepo
 from calypte_api.types.models import Type
@@ -36,34 +35,15 @@ async def test_groups_data(
     ]
     await db_session.execute(insert(Type).values(type_values))
 
-    firmware_values = []
+    group_values = []
     for i in range(100):
         type_obj = random.choice(type_values)
-        firmware_values.append(
+        group_values.append(
             {
                 "id": uuid4(),
                 "company_id": type_obj["company_id"],
                 "type_id": type_obj["id"],
                 "name": f"test name {i}",
-                "serial_number": f"test serial number {i}",
-                "description": f"test firmware description {i}",
-                "version": "v1.0.0",
-                "created_at": datetime.now(),
-                "updated_at": datetime.now(),
-            }
-        )
-    await db_session.execute(insert(FirmwareInfo).values(firmware_values))
-
-    group_values = []
-    for i in range(100):
-        firmware = random.choice(firmware_values)
-        group_values.append(
-            {
-                "id": uuid4(),
-                "company_id": firmware["company_id"],
-                "type_id": firmware["type_id"],
-                "name": f"test name {i}",
-                "assigned_firmware_id": firmware["id"],
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
             }
@@ -88,10 +68,6 @@ async def test_get_groups_by_id(
     assert groups_object.name == exp_groups["name"]
     assert groups_object.company_id == exp_groups["company_id"]
     assert groups_object.type_id == exp_groups["type_id"]
-    assert (
-        groups_object.assigned_firmware_id
-        == exp_groups["assigned_firmware_id"]
-    )
 
 
 @pytest.mark.parametrize(
@@ -165,7 +141,6 @@ async def test_create_groups(
     new_groups = {
         **groups,
         "type_id": expected_groups["type_id"],
-        "assigned_firmware_id": expected_groups["assigned_firmware_id"],
     }
 
     groups_object = await groups_repo.create_group(**new_groups)
@@ -192,7 +167,6 @@ async def test_update_groups(
         **groups,
         "company_id": expected_groups["company_id"],  # type: ignore
         "group_id": expected_groups["id"],
-        "assigned_firmware_id": expected_groups["assigned_firmware_id"],
     }
 
     groups_object = await groups_repo.update_group(**new_groups)

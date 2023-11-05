@@ -134,6 +134,7 @@ class DeviceService(IDeviceService):
             return await self.device_repo.create_device(
                 type_id=request_body.type_id,
                 company_id=company_id,
+                assigned_firmware_id=request_body.assigned_firmware_id,
                 serial_number=request_body.serial_number,
                 name=request_body.name,
                 description=request_body.description,
@@ -152,6 +153,7 @@ class DeviceService(IDeviceService):
             return await self.device_repo.update_device(
                 company_id=company_id,
                 device_id=device_id,
+                assigned_firmware_id=request_body.assigned_firmware_id,
                 serial_number=request_body.serial_number,
                 group_id=request_body.group_id,
                 description=request_body.description,
