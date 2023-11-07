@@ -8,7 +8,7 @@ import pytest_asyncio
 
 from calypte_api.devices.models import Device
 from calypte_api.devices.repository import DeviceRepo
-from calypte_api.firmware_info.models import FirmwareInfo
+from calypte_api.firmware.models import FirmwareInfo
 from calypte_api.groups.models import Group
 from calypte_api.types.models import Type
 from sqlalchemy import insert

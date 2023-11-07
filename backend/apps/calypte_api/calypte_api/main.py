@@ -4,10 +4,10 @@ from calypte_api.common import databases
 from calypte_api.common.models import BaseModel
 from calypte_api.common.settings import get_settings
 from calypte_api.devices.api.v1.routers import router as devices_router
-from calypte_api.firmware.api.v1.routers import router as firmware_router
-from calypte_api.firmware_info.api.v1.routers import (
+from calypte_api.firmware.api.v1.routers import (
     router as firmware_info_router,
 )
+from calypte_api.firmware.api.v1.routers import router as firmware_router
 from calypte_api.groups.api.v1.routers import router as tags_router
 from calypte_api.types.api.v1.routers import router as types_router
 
@@ -28,7 +28,6 @@ from sqlalchemy.schema import CreateSchema
 
 settings = get_settings()
 
-# TODO: update db models/repos to the latest version
 # TODO: use filtration lib and pagination lib in repos instead of custom code
 
 

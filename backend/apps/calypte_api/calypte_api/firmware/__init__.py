@@ -1,6 +1,6 @@
-from calypte_api.groups.models import Group
+from calypte_api.firmware.models import FirmwareInfo
 
 
 __all__ = [
-    "Group",
+    "FirmwareInfo",
 ]

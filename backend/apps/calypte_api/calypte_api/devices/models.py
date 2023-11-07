@@ -7,7 +7,7 @@ from calypte_api.common.models import (
     TimeStampedMixin,
     UUIDMixin,
 )
-from calypte_api.firmware_info.models import FirmwareInfo
+from calypte_api.firmware.models import FirmwareInfo
 from calypte_api.groups.models import Group
 from calypte_api.types.models import Type
 

@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import Form, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi_pagination import Params
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -10,7 +11,14 @@ class BaseFirmwareRequestSchema(BaseModel):
     ...
 
 
-class UploadFirmwareRequestBody:
+class FirmwareInfoUpdateRequestBody(BaseFirmwareRequestSchema):
+    name: str
+    version: str
+    description: str
+    serial_number: str
+
+
+class CreateFirmwareRequestBody:
     def __init__(
         self,
         firmware: UploadFile,
@@ -28,18 +36,39 @@ class UploadFirmwareRequestBody:
         self.type_id = type_id
 
 
+class GetFirmwareInfoQueryParams(BaseFirmwareRequestSchema, Params):
+    type_id: UUID | None = Field(default=None)
+    name: str | None = Field(default=None)
+    version: str | None = Field(default=None)
+    serial_number: str | None = Field(default=None)
+
+
 class BaseFirmwareResponseSchema(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
-
-class UploadFirmwareResponse(BaseFirmwareResponseSchema):
     id: UUID
+    company_id: UUID
+    type_id: UUID
+
     name: str
     version: str
     description: str
+    serial_number: str
 
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
+    created_at: datetime
+    updated_at: datetime
+
+
+class UpdateFirmwareInfoResponse(BaseFirmwareResponseSchema):
+    ...
+
+
+class GetFirmwareInfoResponse(BaseFirmwareResponseSchema):
+    ...
+
+
+class CreateFirmwareResponse(BaseFirmwareResponseSchema):
+    ...
 
 
 class DownloadFirmwareResponse(StreamingResponse):

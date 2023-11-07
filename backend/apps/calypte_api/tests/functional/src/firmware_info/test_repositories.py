@@ -6,8 +6,8 @@ from uuid import uuid4
 import pytest
 import pytest_asyncio
 
-from calypte_api.firmware_info.models import FirmwareInfo
-from calypte_api.firmware_info.repository import FirmwareInfoRepo
+from calypte_api.firmware.models import FirmwareInfo
+from calypte_api.firmware.repositories import FirmwareInfoRepo
 from calypte_api.types.models import Type
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
