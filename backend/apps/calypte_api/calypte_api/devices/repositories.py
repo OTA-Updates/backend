@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Annotated, cast
+from typing import cast
 from uuid import UUID
 
-from calypte_api.common.dependencies import DBSessionType
 from calypte_api.common.exceptions import RepositoryError
 from calypte_api.devices.models import Device
 from calypte_api.devices.schemas import (
@@ -11,7 +10,6 @@ from calypte_api.devices.schemas import (
     UpdateDeviceResponse,
 )
 
-from fastapi import Depends
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import delete, insert, select, update
@@ -203,7 +201,6 @@ class DeviceRepo(IDeviceRepo):
         try:
             device_result = await self.db_session.execute(insert_device_stmt)
             new_device = cast(Device, device_result.scalar())
-            await self.db_session.commit()
         except IntegrityError as e:
             raise RepositoryError("Integrity error") from e
 
@@ -238,7 +235,6 @@ class DeviceRepo(IDeviceRepo):
         try:
             device_result = await self.db_session.execute(insert_device_stmt)
             new_device = cast(Device, device_result.scalar())
-            await self.db_session.commit()
         except IntegrityError as e:
             raise RepositoryError("Integrity error") from e
 
@@ -253,13 +249,9 @@ class DeviceRepo(IDeviceRepo):
 
         try:
             await self.db_session.execute(delete_stmt)
-            await self.db_session.commit()
         except IntegrityError as e:
             raise RepositoryError("Integrity error") from e
 
 
-def get_device_repo(db_session: DBSessionType) -> IDeviceRepo:
+def get_device_repo(db_session: AsyncSession) -> IDeviceRepo:
     return DeviceRepo(db_session=db_session)
-
-
-DeviceRepositoryType = Annotated[IDeviceRepo, Depends(get_device_repo)]

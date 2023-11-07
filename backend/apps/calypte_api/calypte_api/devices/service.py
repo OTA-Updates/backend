@@ -3,11 +3,8 @@ from typing import Annotated
 from uuid import UUID
 
 from calypte_api.common.exceptions import (
-    DatabaseError,
     ObjectNotFoundError,
-    RepositoryError,
 )
-from calypte_api.devices.repository import DeviceRepositoryType, IDeviceRepo
 from calypte_api.devices.schemas import (
     CreateDeviceRequestBody,
     CreateDeviceResponse,
@@ -16,6 +13,10 @@ from calypte_api.devices.schemas import (
     UpdateDeviceRequestBody,
     UpdateDeviceResponse,
 )
+from calypte_api.devices.uow import IUOWDevices, UOWDeviceType
+from calypte_api.firmware.validators import validate_firmware_id
+from calypte_api.groups.validators import validate_group_id
+from calypte_api.types.validators import validate_type_id
 
 from fastapi import Depends
 from fastapi_pagination import Page
@@ -88,15 +89,15 @@ class IDeviceService(ABC):
 
 
 class DeviceService(IDeviceService):
-    def __init__(self, device_repo: IDeviceRepo):
-        self.device_repo = device_repo
+    def __init__(self, uow: IUOWDevices):
+        self.uow = uow
 
     async def get_device(
         self,
         company_id: UUID,
         device_id: UUID,
     ) -> GetDeviceResponse:
-        device_schema = await self.device_repo.get_device_by_id(
+        device_schema = await self.uow.device_repo.get_device_by_id(
             company_id=company_id, device_id=device_id
         )
 
@@ -111,7 +112,7 @@ class DeviceService(IDeviceService):
         limit = query_params.size
         offset = (query_params.page - 1) * query_params.size
 
-        devices = await self.device_repo.get_devices(
+        devices = await self.uow.device_repo.get_devices(
             company_id=company_id,
             limit=limit,
             offset=offset,
@@ -130,8 +131,30 @@ class DeviceService(IDeviceService):
     async def create_device(
         self, company_id: UUID, request_body: CreateDeviceRequestBody
     ) -> CreateDeviceResponse:
-        try:
-            return await self.device_repo.create_device(
+        async with self.uow as uow:
+            # TODO: check if type_id exists
+            # TODO: check if group_id exists and belongs to the same type_id
+            # TODO: check if assigned_firmware_id
+            # exists and belongs to the same type_id
+            await validate_type_id(
+                type_repo=uow.type_repo,
+                type_id=request_body.type_id,
+                company_id=company_id,
+            )
+            await validate_group_id(
+                group_repo=uow.group_repo,
+                type_id=request_body.type_id,
+                group_id=request_body.group_id,
+                company_id=company_id,
+            )
+            await validate_firmware_id(
+                firmware_repo=uow.firmware_repo,
+                type_id=request_body.type_id,
+                firmware_id=request_body.assigned_firmware_id,
+                company_id=company_id,
+            )
+
+            created_device = await uow.device_repo.create_device(
                 type_id=request_body.type_id,
                 company_id=company_id,
                 assigned_firmware_id=request_body.assigned_firmware_id,
@@ -140,8 +163,8 @@ class DeviceService(IDeviceService):
                 description=request_body.description,
                 group_id=request_body.group_id,
             )
-        except RepositoryError as e:
-            raise DatabaseError(detail=str(e))
+            await uow.commit()
+            return created_device
 
     async def update_device(
         self,
@@ -149,8 +172,27 @@ class DeviceService(IDeviceService):
         device_id: UUID,
         request_body: UpdateDeviceRequestBody,
     ) -> UpdateDeviceResponse:
-        try:
-            return await self.device_repo.update_device(
+        async with self.uow as uow:
+            device = await self.uow.device_repo.get_device_by_id(
+                company_id=company_id, device_id=device_id
+            )
+            if device is None:
+                raise ObjectNotFoundError(object_id=device_id)
+
+            await validate_group_id(
+                group_repo=uow.group_repo,
+                type_id=device.type_id,
+                group_id=request_body.group_id,
+                company_id=company_id,
+            )
+            await validate_firmware_id(
+                firmware_repo=uow.firmware_repo,
+                type_id=device.type_id,
+                firmware_id=request_body.assigned_firmware_id,
+                company_id=company_id,
+            )
+
+            updated_device = await uow.device_repo.update_device(
                 company_id=company_id,
                 device_id=device_id,
                 assigned_firmware_id=request_body.assigned_firmware_id,
@@ -159,20 +201,19 @@ class DeviceService(IDeviceService):
                 description=request_body.description,
                 name=request_body.name,
             )
-        except RepositoryError as e:
-            raise DatabaseError(detail=str(e))
+            await uow.commit()
+            return updated_device
 
     async def delete_device(self, company_id: UUID, device_id: UUID) -> None:
-        try:
-            return await self.device_repo.delete_device(
+        async with self.uow as uow:
+            await self.uow.device_repo.delete_device(
                 company_id=company_id, device_id=device_id
             )
-        except RepositoryError as e:
-            raise DatabaseError(detail=str(e))
+            await uow.commit()
 
 
-def get_device_service(device_repo: DeviceRepositoryType) -> IDeviceService:
-    return DeviceService(device_repo=device_repo)
+def get_device_service(uow: UOWDeviceType) -> IDeviceService:
+    return DeviceService(uow=uow)
 
 
 DeviceServiceType = Annotated[IDeviceService, Depends(get_device_service)]

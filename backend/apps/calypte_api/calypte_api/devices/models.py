@@ -23,7 +23,7 @@ class Device(CompanyMixin, UUIDMixin, TimeStampedMixin, BaseModel):
     __tablename__ = "devices"
 
     type_id: Mapped[Type] = mapped_column(
-        ForeignKey("types.id", ondelete="CASCADE")
+        ForeignKey("types.id", ondelete="CASCADE"), nullable=False
     )
     current_firmware_id: Mapped[FirmwareInfo | None] = mapped_column(
         ForeignKey("firmware_info.id", ondelete=None), nullable=True
@@ -32,7 +32,7 @@ class Device(CompanyMixin, UUIDMixin, TimeStampedMixin, BaseModel):
         ForeignKey("firmware_info.id", ondelete=None), nullable=False
     )
     group_id: Mapped[Group] = mapped_column(
-        ForeignKey("groups.id", ondelete=None)
+        ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
     )
 
     serial_number: Mapped[str] = mapped_column(
