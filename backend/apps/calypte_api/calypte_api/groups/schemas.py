@@ -16,13 +16,11 @@ class GetGroupQueryParams(BaseGroupRequestSchema, Params):
 
 class CreateGroupRequestBody(BaseGroupRequestSchema):
     name: str
-    assigned_firmware_id: UUID | None
     type_id: UUID
 
 
 class UpdateGroupRequestBody(BaseGroupRequestSchema):
     name: str
-    assigned_firmware_id: UUID | None
 
 
 class BaseGroupResponseSchema(BaseModel):

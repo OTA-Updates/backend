@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Annotated
 from uuid import UUID
 
-from calypte_api.common.dependencies import DBSessionType
 from calypte_api.groups.models import Group
 from calypte_api.groups.schemas import (
     CreateGroupResponse,
@@ -10,7 +8,6 @@ from calypte_api.groups.schemas import (
     UpdateGroupResponse,
 )
 
-from fastapi import Depends
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -172,7 +169,6 @@ class GroupRepo(IGroupRepo):
         )
         group_model = await self.db_session.scalar(insert_stmt)
 
-        await self.db_session.commit()
         return CreateGroupResponse.model_validate(group_model)
 
     async def update_group(
@@ -191,7 +187,6 @@ class GroupRepo(IGroupRepo):
 
         group_model = await self.db_session.scalar(update_stmt)
 
-        await self.db_session.commit()
         return UpdateGroupResponse.model_validate(group_model)
 
     async def delete_group(self, company_id: UUID, group_id: UUID) -> None:
@@ -201,7 +196,6 @@ class GroupRepo(IGroupRepo):
             .where(Group.company_id == company_id)
         )
         await self.db_session.execute(delete_stmt)
-        await self.db_session.commit()
 
     async def check_groups_belongs_to(
         self,
@@ -221,8 +215,5 @@ class GroupRepo(IGroupRepo):
         return bool(group_model)
 
 
-def get_group_repo(db_session: DBSessionType) -> IGroupRepo:
+def get_group_repo(db_session: AsyncSession) -> IGroupRepo:
     return GroupRepo(db_session=db_session)
-
-
-GroupRepositoryType = Annotated[IGroupRepo, Depends(get_group_repo)]

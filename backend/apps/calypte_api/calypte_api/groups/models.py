@@ -22,7 +22,7 @@ class Group(CompanyMixin, UUIDMixin, TimeStampedMixin, BaseModel):
     __tablename__ = "groups"
 
     type_id: Mapped[Type] = mapped_column(
-        ForeignKey("types.id", ondelete="CASCADE")
+        ForeignKey("types.id", ondelete="CASCADE"), nullable=False
     )
 
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
