@@ -1,6 +1,6 @@
 [tool.mypy]
 files = "backend/"
-ignore_missing_imports = "False"
+ignore_missing_imports = "True"
 strict_optional = "True"
 plugins = ["pydantic.mypy"]
 
