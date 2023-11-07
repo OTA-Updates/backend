@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Annotated
 from uuid import UUID
 
-from calypte_api.common.dependencies import DBSessionType
 from calypte_api.types.models import Type
 from calypte_api.types.schemas import (
     CreateTypeResponse,
@@ -10,7 +8,6 @@ from calypte_api.types.schemas import (
     UpdateTypeResponse,
 )
 
-from fastapi import Depends
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -90,7 +87,7 @@ class ITypeRepo(ABC):
     @abstractmethod
     async def check_type_belongs_to_company(
         self, company_id: UUID, type_id: UUID
-    ):
+    ) -> bool:
         """
         Check that type belongs to company
 
@@ -162,7 +159,6 @@ class TypeRepo(ITypeRepo):
         result = await self.db_session.execute(insert_stmt)
         new_type = result.scalar_one()
 
-        await self.db_session.commit()
         return CreateTypeResponse.model_validate(new_type)
 
     async def update_type(
@@ -182,7 +178,6 @@ class TypeRepo(ITypeRepo):
         result = await self.db_session.execute(update_stmt)
         new_type = result.scalar_one()
 
-        await self.db_session.commit()
         return UpdateTypeResponse.model_validate(new_type)
 
     async def delete_type(self, company_id: UUID, type_id: UUID) -> None:
@@ -192,7 +187,6 @@ class TypeRepo(ITypeRepo):
             .where(Type.company_id == company_id)
         )
 
-        await self.db_session.commit()
         await self.db_session.execute(delete_stmt)
 
     async def check_type_belongs_to_company(
@@ -205,8 +199,5 @@ class TypeRepo(ITypeRepo):
         return bool(type_schema)
 
 
-def get_type_repo(db_session: DBSessionType) -> ITypeRepo:
+def get_type_repo(db_session: AsyncSession) -> ITypeRepo:
     return TypeRepo(db_session=db_session)
-
-
-TypeRepositoryType = Annotated[ITypeRepo, Depends(get_type_repo)]
