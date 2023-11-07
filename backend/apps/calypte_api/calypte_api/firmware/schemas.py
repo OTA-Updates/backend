@@ -17,11 +17,15 @@ class UploadFirmwareRequestBody:
         name: str = Form(),
         version: str = Form(),
         description: str = Form(),
+        serial_number: str = Form(),
+        type_id: UUID = Form(),
     ):
         self.firmware = firmware
         self.name = name
         self.version = version
         self.description = description
+        self.serial_number = serial_number
+        self.type_id = type_id
 
 
 class BaseFirmwareResponseSchema(BaseModel):

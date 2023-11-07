@@ -37,8 +37,10 @@ async def upload_firmware(
 ) -> firmware_schemas.UploadFirmwareResponse:
     # TODO: combine these two calls into one transaction
     firmware_info = await firmware_info_service.create_firmware(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         request_body=firmware_info_schemas.CreateFirmwareInfoRequestBody(
+            type_id=create_firmware_request_body.type_id,
+            serial_number=create_firmware_request_body.serial_number,
             name=create_firmware_request_body.name,
             version=create_firmware_request_body.version,
             description=create_firmware_request_body.description,
@@ -46,9 +48,9 @@ async def upload_firmware(
     )
 
     await firmware_service.upload_firmware(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         firmware_id=firmware_info.id,
-        firmware=create_firmware_request_body.firmware.file,
+        firmware=create_firmware_request_body.firmware,
     )
 
     return firmware_info
@@ -69,6 +71,6 @@ async def download_firmware(
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),
 ) -> firmware_schemas.DownloadFirmwareResponse:
     return await firmware_service.get_firmware_by_id(
-        user_id=jwt_claims.user.id,
+        company_id=jwt_claims.user.id,
         firmware_id=firmware_id,
     )

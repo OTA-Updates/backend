@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi_limiter import FastAPILimiter
 from fastapi_pagination import add_pagination
+from miniopy_async import Minio
 from redis import asyncio as aioredis
 from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
@@ -41,6 +42,13 @@ async def lifespan(app: FastAPI):
     )
     databases.redis = aioredis.from_url(settings.redis_dsn(), encoding="utf-8")
     await FastAPILimiter.init(databases.redis)
+
+    databases.minio_client = Minio(
+        endpoint=settings.minio_endpoint,
+        access_key=settings.minio_access_key,
+        secret_key=settings.minio_secret_key,
+        secure=not settings.debug,
+    )
 
     if settings.debug:
         async with databases.engine.begin() as conn:

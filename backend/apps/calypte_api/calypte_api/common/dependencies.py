@@ -4,11 +4,16 @@ from collections.abc import Callable, Coroutine
 from typing import Annotated
 
 from calypte_api.common.authorization import JWTBearer, JwtClaims
-from calypte_api.common.databases import get_db_session, get_redis_client
+from calypte_api.common.databases import (
+    get_db_session,
+    get_minio_client,
+    get_redis_client,
+)
 from calypte_api.common.settings import get_settings
 
 from fastapi import Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter
+from miniopy_async import Minio
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 settings = get_settings()
 
 DBSessionType = Annotated[AsyncSession, Depends(get_db_session)]
+S3ClientType = Annotated[Minio, Depends(get_minio_client)]
 RedisClientType = Annotated[Redis, Depends(get_redis_client)]
 UserTokenType = Annotated[JwtClaims, Depends(JWTBearer())]
 RateLimiterType = Annotated[

@@ -16,6 +16,7 @@
         "filebeat",
         "isouter",
         "MINIO",
+        "miniopy",
         "ondelete",
         "pytestmark"
     ],

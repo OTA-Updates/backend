@@ -5,34 +5,34 @@ from uuid import UUID
 from calypte_api.firmware.repository import FirmwareRepoType, IFirmwareRepo
 from calypte_api.firmware.schemas import DownloadFirmwareResponse
 
-from fastapi import Depends
+from fastapi import Depends, UploadFile
 
 
 class IFirmwareService(ABC):
     @abstractmethod
     async def get_firmware_by_id(
-        self, user_id: UUID, firmware_id: UUID
+        self, company_id: UUID, firmware_id: UUID
     ) -> DownloadFirmwareResponse:
         """
         Get firmware by id
 
         Args:
             firmware_id (UUID): firmware id
-            user_id (UUID): user id
+            company_id (UUID): user id
 
         """
 
     @abstractmethod
     async def upload_firmware(
-        self, user_id: UUID, firmware_id: UUID, firmware: bytes
+        self, company_id: UUID, firmware_id: UUID, firmware: UploadFile
     ) -> None:
         """
         Upload firmware
 
         Args:
-            user_id (UUID): user id
+            company_id (UUID): user id
             firmware_id (UUID): firmware id
-            firmware (bytes): firmware
+            firmware (UploadFile): firmware
         """
 
 
@@ -41,21 +41,21 @@ class FirmwareService(IFirmwareService):
         self.firmware_repo = firmware_repo
 
     async def get_firmware_by_id(
-        self, user_id: UUID, firmware_id: UUID
+        self, company_id: UUID, firmware_id: UUID
     ) -> DownloadFirmwareResponse:
-        firmware_stream = self.firmware_repo.get_firmware_by_id(
-            user_id=user_id, firmware_id=firmware_id
+        firmware_generator = self.firmware_repo.get_firmware_by_id(
+            company_id=company_id, firmware_id=firmware_id
         )
-        return DownloadFirmwareResponse(firmware_stream)
+        return DownloadFirmwareResponse(firmware_generator)
 
     async def upload_firmware(
         self,
-        user_id: UUID,
+        company_id: UUID,
         firmware_id: UUID,
-        firmware: bytes,
+        firmware: UploadFile,
     ) -> None:
         await self.firmware_repo.upload_firmware(
-            user_id=user_id, firmware_id=firmware_id, firmware=firmware
+            company_id=company_id, firmware_id=firmware_id, firmware=firmware
         )
 
 
