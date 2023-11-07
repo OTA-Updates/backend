@@ -22,7 +22,7 @@ class FirmwareInfo(BaseModel, CompanyMixin, TimeStampedMixin, UUIDMixin):
     )
 
     type_id: Mapped[Type] = mapped_column(
-        ForeignKey("types.id", ondelete=None)
+        ForeignKey("types.id", ondelete="CASCADE"), nullable=False
     )
 
     def __repr__(self) -> str:

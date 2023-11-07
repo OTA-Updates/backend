@@ -106,7 +106,7 @@ class FirmwareService(IFirmwareService):
     async def get_firmware(
         self, company_id: UUID, firmware_id: UUID
     ) -> DownloadFirmwareResponse:
-        firmware_generator = self.uow.s3_repo.get_firmware_by_id(
+        firmware_generator = self.uow.firm_s3_repo.get_firmware_by_id(
             company_id=company_id, firmware_id=firmware_id
         )
         return DownloadFirmwareResponse(firmware_generator)  # type: ignore
@@ -132,7 +132,7 @@ class FirmwareService(IFirmwareService):
         company_id: UUID,
         firmware_id: UUID,
     ) -> GetFirmwareInfoResponse:
-        firmware_schema = await self.uow.sql_repo.get_firmware_by_id(
+        firmware_schema = await self.uow.firm_sql_repo.get_firmware_by_id(
             company_id=company_id,
             firmware_id=firmware_id,
         )
@@ -148,7 +148,7 @@ class FirmwareService(IFirmwareService):
         limit = query_params.size
         offset = (query_params.page - 1) * limit
 
-        firmware_list = await self.uow.sql_repo.get_firmware_list(
+        firmware_list = await self.uow.firm_sql_repo.get_firmware_list(
             company_id=company_id,
             serial_number=query_params.serial_number,
             offset=offset,
@@ -171,7 +171,7 @@ class FirmwareService(IFirmwareService):
         request_body: FirmwareInfoUpdateRequestBody,
     ) -> UpdateFirmwareInfoResponse:
         async with self.uow as uow:
-            firmware_info = await uow.sql_repo.update_firmware(
+            firmware_info = await uow.firm_sql_repo.update_firmware(
                 company_id=company_id,
                 serial_number=request_body.serial_number,
                 firmware_id=firmware_id,
@@ -179,7 +179,7 @@ class FirmwareService(IFirmwareService):
                 description=request_body.description,
                 version=request_body.version,
             )
-            uow.commit()
+            await uow.commit()
 
         return firmware_info
 

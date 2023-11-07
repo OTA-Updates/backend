@@ -186,9 +186,9 @@ class FirmwareS3Repo(IFirmwareS3Repo):
         firmware_id: UUID,
         firmware: UploadFile,
     ) -> None:
-        # bucket = await self.client.bucket_exists(str(company_id))
-        # if not bucket:
-        #     await self.client.make_bucket(str(company_id))
+        bucket = await self.client.bucket_exists(str(company_id))
+        if not bucket:
+            await self.client.make_bucket(str(company_id))
 
         await self.client.put_object(
             bucket_name=str(company_id),
