@@ -1,16 +1,24 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
-from fastapi_pagination import Params
-from pydantic import BaseModel, ConfigDict, Field
+from calypte_api.types.models import Type
+
+from fastapi_filter.contrib.sqlalchemy import Filter
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseTypeRequestSchema(BaseModel):
     ...
 
 
-class GetTypeQueryParams(BaseTypeRequestSchema, Params):
-    name: str | None = Field(alias="name", default=None)
+class TypeFilter(Filter):
+    name__like: Optional[str] = None  # noqa: UP007
+    order_by: Optional[list[str]] = None  # noqa: UP007
+
+    class Constants(Filter.Constants):
+        model = Type
+        order_by_choices = ["name", "created_at", "updated_at"]
 
 
 class CreateTypeRequestBody(BaseTypeRequestSchema):

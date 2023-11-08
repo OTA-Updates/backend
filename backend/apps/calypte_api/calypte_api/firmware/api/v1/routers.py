@@ -3,6 +3,7 @@ from uuid import UUID
 
 from calypte_api.common.dependencies import (
     JwtClaims,
+    PaginationParamsType,
     RateLimiterType,
     check_permission,
 )
@@ -11,6 +12,7 @@ from calypte_api.firmware import schemas as firmware_schemas
 from calypte_api.firmware.service import FirmwareServiceType
 
 from fastapi import APIRouter, Depends
+from fastapi_filter import FilterDepends
 from fastapi_pagination import Page
 
 
@@ -70,14 +72,16 @@ async def download_firmware(
 async def retrieve_firmware_list(
     _: RateLimiterType,
     firmware_info_service: FirmwareServiceType,
-    query_params: firmware_schemas.GetFirmwareInfoQueryParams = Depends(  # noqa B008
-        firmware_schemas.GetFirmwareInfoQueryParams
+    pagination_params: PaginationParamsType,
+    filtration_params: firmware_schemas.FirmwareFilter = FilterDepends(
+        firmware_schemas.FirmwareFilter
     ),
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[firmware_schemas.GetFirmwareInfoResponse]:
     return await firmware_info_service.get_firmware_info_list(
         company_id=jwt_claims.user.id,
-        query_params=query_params,
+        pagination_params=pagination_params,
+        filtration_params=filtration_params,
     )
 
 

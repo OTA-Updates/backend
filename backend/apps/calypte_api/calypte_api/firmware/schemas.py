@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
+
+from calypte_api.firmware.models import FirmwareInfo
 
 from fastapi import Form, UploadFile
 from fastapi.responses import StreamingResponse
-from fastapi_pagination import Params
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi_filter.contrib.sqlalchemy import Filter
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseFirmwareRequestSchema(BaseModel):
@@ -36,11 +39,16 @@ class CreateFirmwareRequestBody:
         self.type_id = type_id
 
 
-class GetFirmwareInfoQueryParams(BaseFirmwareRequestSchema, Params):
-    type_id: UUID | None = Field(default=None)
-    name: str | None = Field(default=None)
-    version: str | None = Field(default=None)
-    serial_number: str | None = Field(default=None)
+class FirmwareFilter(Filter):
+    name__like: Optional[str] = None  # noqa: UP007
+    type_id: Optional[UUID] = None  # noqa: UP007
+    version__like: Optional[str] = None  # noqa: UP007
+    serial_number__like: Optional[str] = None  # noqa: UP007
+    order_by: Optional[list[str]] = None  # noqa: UP007
+
+    class Constants(Filter.Constants):
+        model = FirmwareInfo
+        order_by_choices = ["name", "created_at", "updated_at"]
 
 
 class BaseFirmwareResponseSchema(BaseModel):

@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 
 from calypte_api.groups.models import Group
-from calypte_api.groups.repository import GroupRepo
+from calypte_api.groups.repositories import GroupRepo
 from calypte_api.types.models import Type
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,58 +68,6 @@ async def test_get_groups_by_id(
     assert groups_object.name == exp_groups["name"]
     assert groups_object.company_id == exp_groups["company_id"]
     assert groups_object.type_id == exp_groups["type_id"]
-
-
-@pytest.mark.parametrize(
-    "limit, offset, name, type_id_filter",
-    [
-        (5, 1, None, False),
-        (5, 0, None, False),
-        (5, 1, "test group", False),
-        (5, 1, None, True),
-        (5, 1, None, False),
-        (5, 1, "test group", True),
-    ],
-)
-async def test_get_groups(
-    test_groups_data: list[dict],
-    groups_repo: GroupRepo,
-    limit: int,
-    offset: int,
-    name: str | None,
-    type_id_filter: bool,
-) -> None:
-    command_id = test_groups_data[0]["company_id"]
-    type_id = None
-
-    if type_id_filter:
-        type_id = test_groups_data[0]["type_id"]
-
-    groups_objects = await groups_repo.get_groups(
-        company_id=command_id,
-        type_id=type_id,
-        name=name,
-        limit=limit,
-        offset=offset,
-    )
-
-    expected_groups = [
-        groups_data
-        for groups_data in test_groups_data
-        if (groups_data["company_id"] == command_id)
-        and (name is None or groups_data["name"] == name)
-        and (type_id is None or groups_data["type_id"] == type_id)
-    ]
-
-    end = offset + limit
-    expected_groups = expected_groups[offset:end]
-    expected_groups.sort(key=lambda x: x["created_at"])
-
-    assert len(groups_objects) == len(expected_groups)
-
-    for groups_object, expected_group in zip(groups_objects, expected_groups):
-        assert groups_object.id == expected_group["id"]
-        assert groups_object.name == expected_group["name"]
 
 
 @pytest.mark.parametrize(

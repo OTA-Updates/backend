@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import cast
 from uuid import UUID
 
@@ -6,10 +7,13 @@ from calypte_api.common.exceptions import RepositoryError
 from calypte_api.devices.models import Device
 from calypte_api.devices.schemas import (
     CreateDeviceResponse,
+    DeviceFilter,
     GetDeviceResponse,
     UpdateDeviceResponse,
 )
 
+from fastapi_pagination import Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import delete, insert, select, update
@@ -33,26 +37,16 @@ class IDeviceRepo(ABC):
     async def get_devices(
         self,
         company_id: UUID,
-        type_id: UUID | None,
-        group_id: UUID | None,
-        serial_number: str | None,
-        current_firmware_id: UUID | None,
-        name: str | None,
-        offset: int,
-        limit: int,
+        pagination_params: Params,
+        filtration_params: DeviceFilter,
     ) -> list[GetDeviceResponse]:
         """
         Get devices by query params
 
         Args:
             company_id (UUID): user id
-            type_id (UUID | None): type id
-            tags (list[UUID]): device tags
-            serial_number (str | None): device serial number
-            current_firmware_id (UUID | None): current firmware id
-            name (str | None): device name
-            offset (int): offset
-            limit (int): limit
+            pagination_params (Params): pagination params
+            filtration_params (DeviceFilter): filtration params
         """
 
     @abstractmethod
@@ -133,44 +127,27 @@ class DeviceRepo(IDeviceRepo):
 
         return GetDeviceResponse.model_validate(device_model)
 
+    def _transformer(
+        self, device: Sequence[Device]
+    ) -> list[GetDeviceResponse]:
+        return [GetDeviceResponse.model_validate(model) for model in device]
+
     async def get_devices(
         self,
         company_id: UUID,
-        type_id: UUID | None,
-        group_id: UUID | None,
-        serial_number: str | None,
-        current_firmware_id: UUID | None,
-        name: str | None,
-        offset: int,
-        limit: int,
+        pagination_params: Params,
+        filtration_params: DeviceFilter,
     ) -> list[GetDeviceResponse]:
         select_stmt = select(Device).where(Device.company_id == company_id)
+        select_stmt = filtration_params.filter(select_stmt)
+        select_stmt = filtration_params.sort(select_stmt)
 
-        if serial_number is not None:
-            select_stmt = select_stmt.where(
-                Device.serial_number == serial_number
-            )
-        if current_firmware_id is not None:
-            select_stmt = select_stmt.where(
-                Device.current_firmware_id == current_firmware_id
-            )
-        if group_id is not None:
-            select_stmt = select_stmt.where(Device.group_id == group_id)
-        if type_id is not None:
-            select_stmt = select_stmt.where(Device.type_id == type_id)
-        if name is not None:
-            select_stmt = select_stmt.where(Device.name == name)
-
-        select_stmt = (
-            select_stmt.order_by(Device.created_at).offset(offset).limit(limit)
+        get_devices_schemas = await paginate(
+            self.db_session,
+            select_stmt,
+            params=pagination_params,
+            transformer=self._transformer,
         )
-
-        device_models = await self.db_session.scalars(select_stmt)
-
-        get_devices_schemas = [
-            GetDeviceResponse.model_validate(device_model)
-            for device_model in device_models
-        ]
 
         return get_devices_schemas
 

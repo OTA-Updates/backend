@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from collections.abc import Coroutine, Iterable
+from collections.abc import Coroutine, Iterable, Sequence
 from typing import Any
 from uuid import UUID
 
 from calypte_api.firmware.models import FirmwareInfo
 from calypte_api.firmware.schemas import (
     CreateFirmwareResponse,
+    FirmwareFilter,
     GetFirmwareInfoResponse,
     UpdateFirmwareInfoResponse,
 )
@@ -13,6 +14,8 @@ from calypte_api.firmware.schemas import (
 import aiohttp
 
 from fastapi import UploadFile
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from miniopy_async import Minio
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,13 +74,9 @@ class IFirmwareInfoRepo(ABC):
     async def get_firmware_list(
         self,
         company_id: UUID,
-        limit: int,
-        offset: int,
-        serial_number: str | None,
-        type_id: UUID | None,
-        version: str | None,
-        name: str | None,
-    ) -> list[GetFirmwareInfoResponse]:
+        pagination_params: Params,
+        filtration_params: FirmwareFilter,
+    ) -> Page[GetFirmwareInfoResponse]:
         """
         Get firmware by query params
 
@@ -216,41 +215,32 @@ class FirmwareInfoRepo(IFirmwareInfoRepo):
 
         return GetFirmwareInfoResponse.model_validate(firmware_info_model)
 
+    def _transformer(
+        self, models: Sequence[FirmwareInfo]
+    ) -> list[GetFirmwareInfoResponse]:
+        return [
+            GetFirmwareInfoResponse.model_validate(model) for model in models
+        ]
+
     async def get_firmware_list(
         self,
         company_id: UUID,
-        limit: int,
-        offset: int,
-        serial_number: str | None,
-        type_id: UUID | None,
-        version: str | None,
-        name: str | None,
-    ) -> list[GetFirmwareInfoResponse]:
+        pagination_params: Params,
+        filtration_params: FirmwareFilter,
+    ) -> Page[GetFirmwareInfoResponse]:
         select_stmt = select(FirmwareInfo).where(
             FirmwareInfo.company_id == company_id
         )
-        if serial_number:
-            select_stmt = select_stmt.where(
-                FirmwareInfo.serial_number == serial_number
-            )
-        if type_id:
-            select_stmt = select_stmt.where(FirmwareInfo.type_id == type_id)
-        if name:
-            select_stmt = select_stmt.where(FirmwareInfo.name == name)
-        if version:
-            select_stmt = select_stmt.where(FirmwareInfo.version == version)
 
-        select_stmt = (
-            select_stmt.order_by(FirmwareInfo.created_at)
-            .limit(limit=limit)
-            .offset(offset=offset)
+        select_stmt = filtration_params.filter(select_stmt)
+        select_stmt = filtration_params.sort(select_stmt)
+
+        firmware_info_schemas = await paginate(
+            self.db_session,
+            select_stmt,
+            params=pagination_params,
+            transformer=self._transformer,
         )
-        firmware_info_models = await self.db_session.scalars(select_stmt)
-
-        firmware_info_schemas = [
-            GetFirmwareInfoResponse.model_validate(firmware_info)
-            for firmware_info in firmware_info_models
-        ]
 
         return firmware_info_schemas
 

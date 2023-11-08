@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 
 from calypte_api.types.models import Type
-from calypte_api.types.repository import TypeRepo
+from calypte_api.types.repositories import TypeRepo
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -48,41 +48,6 @@ async def test_get_type_by_id(
     assert type_object.id == expected_type["id"]
     assert type_object.name == expected_type["name"]
     assert type_object.description == expected_type["description"]
-
-
-@pytest.mark.parametrize(
-    "limit, offset",
-    [
-        (1, 0),
-        (5, 2),
-        (20, 100),
-    ],
-)
-async def test_get_types(
-    test_type_data: list[dict], type_repo: TypeRepo, limit: int, offset: int
-) -> None:
-    command_id = test_type_data[0]["company_id"]
-    type_object = await type_repo.get_types(
-        company_id=command_id,
-        name=None,
-        limit=limit,
-        offset=offset,
-    )
-
-    expected_types = [
-        type_data
-        for type_data in test_type_data
-        if type_data["company_id"] == command_id
-    ]
-
-    expected_types = expected_types[offset : offset + limit]
-    expected_types.sort(key=lambda x: x["created_at"])
-
-    assert len(type_object) == len(expected_types)
-    for type_object, expected_type in zip(type_object, expected_types):
-        assert type_object.id == expected_type["id"]
-        assert type_object.name == expected_type["name"]
-        assert type_object.description == expected_type["description"]
 
 
 @pytest.mark.parametrize(

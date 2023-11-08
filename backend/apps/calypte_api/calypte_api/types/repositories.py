@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from uuid import UUID
 
 from calypte_api.types.models import Type
 from calypte_api.types.schemas import (
     CreateTypeResponse,
     GetTypeResponse,
+    TypeFilter,
     UpdateTypeResponse,
 )
 
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,8 +34,11 @@ class ITypeRepo(ABC):
 
     @abstractmethod
     async def get_types(
-        self, company_id: UUID, name: str | None, offset: int, limit: int
-    ) -> list[GetTypeResponse]:
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: TypeFilter,
+    ) -> Page[GetTypeResponse]:
         """
         Get types by query params
 
@@ -118,25 +125,26 @@ class TypeRepo(ITypeRepo):
 
         return GetTypeResponse.model_validate(types_models)
 
+    def _transformer(self, models: Sequence[Type]) -> list[GetTypeResponse]:
+        return [GetTypeResponse.model_validate(model) for model in models]
+
     async def get_types(
-        self, company_id: UUID, name: str | None, offset: int, limit: int
-    ) -> list[GetTypeResponse]:
-        select_stmt = (
-            select(Type)
-            .where(Type.company_id == company_id)
-            .order_by(Type.created_at)
-            .offset(offset=offset)
-            .limit(limit=limit)
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: TypeFilter,
+    ) -> Page[GetTypeResponse]:
+        select_stmt = select(Type).where(Type.company_id == company_id)
+        select_stmt = filtration_params.filter(select_stmt)
+        select_stmt = filtration_params.sort(select_stmt)
+
+        get_type_schemas = await paginate(
+            self.db_session,
+            select_stmt,
+            params=pagination_params,
+            transformer=self._transformer,
         )
-        if name is not None:
-            select_stmt = select_stmt.where(Type.name == name)
 
-        types_models = await self.db_session.scalars(statement=select_stmt)
-
-        get_type_schemas = [
-            GetTypeResponse.model_validate(type_model)
-            for type_model in types_models
-        ]
         return get_type_schemas
 
     async def create_type(

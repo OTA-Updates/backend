@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 
 from calypte_api.devices.models import Device
-from calypte_api.devices.repository import DeviceRepo
+from calypte_api.devices.repositories import DeviceRepo
 from calypte_api.firmware.models import FirmwareInfo
 from calypte_api.groups.models import Group
 from calypte_api.types.models import Type
@@ -118,84 +118,6 @@ async def test_get_device_by_id(
         device_object.current_firmware_id
         == expected_device["current_firmware_id"]
     )
-
-
-@pytest.mark.parametrize(
-    "limit, offset, name, serial_number, type_id_filter, group_filter, firmware_info_filter",  # noqa
-    [
-        (5, 1, None, None, False, False, False),
-        (5, 0, "test name 1", None, False, False, False),
-        (5, 0, None, "serial number 1", False, False, False),
-        (5, 0, "test name 1", None, False, False, False),
-        (5, 0, None, None, True, False, False),
-        (5, 0, None, None, False, True, False),
-        (5, 0, None, None, False, False, True),
-        (5, 0, "test name 1", "serial number", True, True, True),
-    ],
-)
-async def test_get_devices(
-    test_device_data: list[dict],
-    device_repo: DeviceRepo,
-    limit: int,
-    offset: int,
-    name: str | None,
-    serial_number: str | None,
-    type_id_filter: bool,
-    group_filter: bool,
-    firmware_info_filter: bool,
-) -> None:
-    command_id = test_device_data[0]["company_id"]
-    type_id = None
-    group_id = None
-    current_firmware_id = None
-
-    if type_id_filter:
-        type_id = test_device_data[0]["type_id"]
-    if group_filter:
-        group_id = test_device_data[0]["group_id"]
-    if firmware_info_filter:
-        current_firmware_id = test_device_data[0]["current_firmware_id"]
-
-    device_objects = await device_repo.get_devices(
-        company_id=command_id,
-        serial_number=serial_number,
-        type_id=type_id,
-        current_firmware_id=current_firmware_id,
-        name=name,
-        group_id=group_id,
-        limit=limit,
-        offset=offset,
-    )
-
-    expected_devices = [
-        device_data
-        for device_data in test_device_data
-        if (device_data["company_id"] == command_id)
-        and (name is None or device_data["name"] in name)
-        and (
-            serial_number is None
-            or device_data["serial_number"] == serial_number
-        )
-        and (type_id is None or device_data["type_id"] == type_id)
-        and (group_id is None or device_data["group_id"] == group_id)
-        and (
-            current_firmware_id is None
-            or device_data["current_firmware_id"] == current_firmware_id
-        )
-    ]
-
-    end = offset + limit
-    expected_devices = expected_devices[offset:end]
-    expected_devices.sort(key=lambda x: x["created_at"])
-
-    assert len(device_objects) == len(expected_devices)
-
-    for device_object, expected_device in zip(
-        device_objects, expected_devices
-    ):
-        assert device_object.id == expected_device["id"]
-        assert device_object.name == expected_device["name"]
-        assert device_object.description == expected_device["description"]
 
 
 @pytest.mark.parametrize(

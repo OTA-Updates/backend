@@ -8,7 +8,7 @@ from calypte_api.common.exceptions import (
 from calypte_api.devices.schemas import (
     CreateDeviceRequestBody,
     CreateDeviceResponse,
-    GetDeviceQueryParams,
+    DeviceFilter,
     GetDeviceResponse,
     UpdateDeviceRequestBody,
     UpdateDeviceResponse,
@@ -19,7 +19,7 @@ from calypte_api.groups.validators import validate_group_id
 from calypte_api.types.validators import validate_type_id
 
 from fastapi import Depends
-from fastapi_pagination import Page
+from fastapi_pagination import Page, Params
 
 
 class IDeviceService(ABC):
@@ -38,7 +38,10 @@ class IDeviceService(ABC):
 
     @abstractmethod
     async def get_devices(
-        self, company_id: UUID, query_params: GetDeviceQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: DeviceFilter,
     ) -> Page[GetDeviceResponse]:
         """
         Get all devices
@@ -107,35 +110,22 @@ class DeviceService(IDeviceService):
         return device_schema
 
     async def get_devices(
-        self, company_id: UUID, query_params: GetDeviceQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: DeviceFilter,
     ) -> Page[GetDeviceResponse]:
-        limit = query_params.size
-        offset = (query_params.page - 1) * query_params.size
-
-        devices = await self.uow.device_repo.get_devices(
+        devices_page = await self.uow.device_repo.get_devices(
             company_id=company_id,
-            limit=limit,
-            offset=offset,
-            group_id=query_params.group_id,
-            serial_number=query_params.serial_number,
-            current_firmware_id=query_params.current_firmware_id,
-            type_id=query_params.type_id,
-            name=query_params.name,
+            pagination_params=pagination_params,
+            filtration_params=filtration_params,
         )
-        return Page.create(
-            items=devices,
-            params=query_params,
-            total=query_params.size,
-        )
+        return devices_page
 
     async def create_device(
         self, company_id: UUID, request_body: CreateDeviceRequestBody
     ) -> CreateDeviceResponse:
         async with self.uow as uow:
-            # TODO: check if type_id exists
-            # TODO: check if group_id exists and belongs to the same type_id
-            # TODO: check if assigned_firmware_id
-            # exists and belongs to the same type_id
             await validate_type_id(
                 type_repo=uow.type_repo,
                 type_id=request_body.type_id,

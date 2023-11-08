@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from uuid import UUID
 
 from calypte_api.groups.models import Group
 from calypte_api.groups.schemas import (
     CreateGroupResponse,
     GetGroupResponse,
+    GroupFilter,
     UpdateGroupResponse,
 )
 
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,11 +36,9 @@ class IGroupRepo(ABC):
     async def get_groups(
         self,
         company_id: UUID,
-        limit: int,
-        offset: int,
-        type_id: UUID | None,
-        name: str | None,
-    ) -> list[GetGroupResponse]:
+        pagination_params: Params,
+        filtration_params: GroupFilter,
+    ) -> Page[GetGroupResponse]:
         """
         Get groups by query params
 
@@ -126,30 +128,28 @@ class GroupRepo(IGroupRepo):
 
         return GetGroupResponse.model_validate(group_model)
 
+    async def _transformer(
+        self, models: Sequence[Group]
+    ) -> list[GetGroupResponse]:
+        return [GetGroupResponse.model_validate(model) for model in models]
+
     async def get_groups(
         self,
         company_id: UUID,
-        limit: int,
-        offset: int,
-        type_id: UUID | None,
-        name: str | None,
-    ) -> list[GetGroupResponse]:
+        pagination_params: Params,
+        filtration_params: GroupFilter,
+    ) -> Page[GetGroupResponse]:
         select_stmt = select(Group).where(Group.company_id == company_id)
 
-        if name:
-            select_stmt = select_stmt.where(Group.name == name)
-        if type_id:
-            select_stmt = select_stmt.where(Group.type_id == type_id)
+        select_stmt = filtration_params.filter(select_stmt)
+        select_stmt = filtration_params.sort(select_stmt)
 
-        select_stmt = (
-            select_stmt.limit(limit).offset(offset).order_by(Group.created_at)
+        group_schemas = await paginate(
+            self.db_session,
+            select_stmt,
+            params=pagination_params,
+            transformer=self._transformer,
         )
-        groups_models = await self.db_session.scalars(select_stmt)
-
-        group_schemas = [
-            GetGroupResponse.model_validate(group_model)
-            for group_model in groups_models
-        ]
         return group_schemas
 
     async def create_group(

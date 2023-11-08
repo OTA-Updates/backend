@@ -13,6 +13,7 @@ from calypte_api.common.settings import get_settings
 
 from fastapi import Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter
+from fastapi_pagination import Params
 from miniopy_async import Minio
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,6 +24,7 @@ settings = get_settings()
 DBSessionType = Annotated[AsyncSession, Depends(get_db_session)]
 S3ClientType = Annotated[Minio, Depends(get_minio_client)]
 RedisClientType = Annotated[Redis, Depends(get_redis_client)]
+PaginationParamsType = Annotated[Params, Depends()]
 UserTokenType = Annotated[JwtClaims, Depends(JWTBearer())]
 RateLimiterType = Annotated[
     RateLimiter,

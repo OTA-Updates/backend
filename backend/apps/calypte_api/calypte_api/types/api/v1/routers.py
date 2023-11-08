@@ -2,6 +2,7 @@ from uuid import UUID
 
 from calypte_api.common.dependencies import (
     JwtClaims,
+    PaginationParamsType,
     RateLimiterType,
     check_permission,
 )
@@ -10,6 +11,7 @@ from calypte_api.types import schemas as type_schemas
 from calypte_api.types.service import TypeServiceType
 
 from fastapi import APIRouter, Depends
+from fastapi_filter import FilterDepends
 from fastapi_pagination import Page
 
 
@@ -47,14 +49,16 @@ async def create_type(
 async def retrieve_types(
     _: RateLimiterType,
     type_service: TypeServiceType,
-    query_params: type_schemas.GetTypeQueryParams = Depends(  # noqa B008
-        type_schemas.GetTypeQueryParams
+    pagination_params: PaginationParamsType,
+    filtration_params: type_schemas.TypeFilter = FilterDepends(
+        type_schemas.TypeFilter
     ),
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[type_schemas.GetTypeResponse]:
     return await type_service.get_types(
         company_id=jwt_claims.user.id,
-        query_params=query_params,
+        pagination_params=pagination_params,
+        filtration_params=filtration_params,
     )
 
 

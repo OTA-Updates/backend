@@ -2,6 +2,7 @@ from uuid import UUID
 
 from calypte_api.common.dependencies import (
     JwtClaims,
+    PaginationParamsType,
     RateLimiterType,
     check_permission,
 )
@@ -10,6 +11,7 @@ from calypte_api.groups import schemas as groups_schemas
 from calypte_api.groups.service import GroupServiceType
 
 from fastapi import APIRouter, Depends
+from fastapi_filter import FilterDepends
 from fastapi_pagination import Page
 
 
@@ -47,14 +49,16 @@ async def create_group(
 async def get_groups_page(
     _: RateLimiterType,
     group_service: GroupServiceType,
-    query_params: groups_schemas.GetGroupQueryParams = Depends(  # noqa B008
-        groups_schemas.GetGroupQueryParams
+    pagination_params: PaginationParamsType,
+    filtration_params: groups_schemas.GroupFilter = FilterDepends(
+        groups_schemas.GroupFilter
     ),
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[groups_schemas.GetGroupResponse]:
     return await group_service.get_groups(
         company_id=jwt_claims.user.id,
-        query_params=query_params,
+        pagination_params=pagination_params,
+        filtration_params=filtration_params,
     )
 
 

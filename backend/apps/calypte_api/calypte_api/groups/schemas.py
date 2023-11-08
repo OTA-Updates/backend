@@ -1,17 +1,24 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
-from fastapi_pagination import Params
-from pydantic import BaseModel, ConfigDict, Field
+from calypte_api.groups.models import Group
+
+from fastapi_filter.contrib.sqlalchemy import Filter
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseGroupRequestSchema(BaseModel):
     ...
 
 
-class GetGroupQueryParams(BaseGroupRequestSchema, Params):
-    name: str | None = Field(default=None)
-    type_id: UUID | None = Field(default=None)
+class GroupFilter(Filter):
+    name__like: Optional[str] = None  # noqa: UP007
+    order_by: Optional[list[str]] = None  # noqa: UP007
+
+    class Constants(Filter.Constants):
+        model = Group
+        order_by_choices = ["name", "created_at", "updated_at"]
 
 
 class CreateGroupRequestBody(BaseGroupRequestSchema):

@@ -8,8 +8,8 @@ from calypte_api.firmware.schemas import (
     CreateFirmwareRequestBody,
     CreateFirmwareResponse,
     DownloadFirmwareResponse,
+    FirmwareFilter,
     FirmwareInfoUpdateRequestBody,
-    GetFirmwareInfoQueryParams,
     GetFirmwareInfoResponse,
     UpdateFirmwareInfoResponse,
 )
@@ -19,7 +19,7 @@ from calypte_api.firmware.uow import (
 )
 
 from fastapi import Depends
-from fastapi_pagination import Page
+from fastapi_pagination import Page, Params
 
 
 class IFirmwareService(ABC):
@@ -67,7 +67,10 @@ class IFirmwareService(ABC):
 
     @abstractmethod
     async def get_firmware_info_list(
-        self, company_id: UUID, query_params: GetFirmwareInfoQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: FirmwareFilter,
     ) -> Page[GetFirmwareInfoResponse]:
         """
         Get all firmware
@@ -143,26 +146,18 @@ class FirmwareService(IFirmwareService):
         return firmware_schema
 
     async def get_firmware_info_list(
-        self, company_id: UUID, query_params: GetFirmwareInfoQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: FirmwareFilter,
     ) -> Page[GetFirmwareInfoResponse]:
-        limit = query_params.size
-        offset = (query_params.page - 1) * limit
-
-        firmware_list = await self.uow.firm_sql_repo.get_firmware_list(
+        firmware_page = await self.uow.firm_sql_repo.get_firmware_list(
             company_id=company_id,
-            serial_number=query_params.serial_number,
-            offset=offset,
-            limit=limit,
-            type_id=query_params.type_id,
-            name=query_params.name,
-            version=query_params.version,
+            pagination_params=pagination_params,
+            filtration_params=filtration_params,
         )
 
-        return Page.create(
-            items=firmware_list,
-            params=query_params,
-            total=query_params.size,
-        )
+        return firmware_page
 
     async def update_firmware_info(
         self,

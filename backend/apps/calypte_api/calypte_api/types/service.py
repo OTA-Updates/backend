@@ -6,15 +6,15 @@ from calypte_api.common.exceptions import ObjectNotFoundError
 from calypte_api.types.schemas import (
     CreateTypeRequestBody,
     CreateTypeResponse,
-    GetTypeQueryParams,
     GetTypeResponse,
+    TypeFilter,
     UpdateTypeRequestBody,
     UpdateTypeResponse,
 )
 from calypte_api.types.uow import UOWTypeType
 
 from fastapi import Depends
-from fastapi_pagination import Page
+from fastapi_pagination import Page, Params
 
 
 class ITypeService(ABC):
@@ -35,7 +35,10 @@ class ITypeService(ABC):
 
     @abstractmethod
     async def get_types(
-        self, company_id: UUID, query_params: GetTypeQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: TypeFilter,
     ) -> Page[GetTypeResponse]:
         """
         Get all types
@@ -106,22 +109,17 @@ class TypeService(ITypeService):
         return type_schema
 
     async def get_types(
-        self, company_id: UUID, query_params: GetTypeQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: TypeFilter,
     ) -> Page[GetTypeResponse]:
-        limit = query_params.size
-        offset = (query_params.page - 1) * query_params.size
-
         types = await self.uow.type_repo.get_types(
             company_id=company_id,
-            name=query_params.name,
-            limit=limit,
-            offset=offset,
+            pagination_params=pagination_params,
+            filtration_params=filtration_params,
         )
-        return Page.create(
-            items=types,
-            params=query_params,
-            total=query_params.size,
-        )
+        return types
 
     async def create_type(
         self, company_id: UUID, request_body: CreateTypeRequestBody

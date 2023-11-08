@@ -6,8 +6,8 @@ from calypte_api.common.exceptions import ObjectNotFoundError
 from calypte_api.groups.schemas import (
     CreateGroupRequestBody,
     CreateGroupResponse,
-    GetGroupQueryParams,
     GetGroupResponse,
+    GroupFilter,
     UpdateGroupRequestBody,
     UpdateGroupResponse,
 )
@@ -15,7 +15,7 @@ from calypte_api.groups.uow import IUOWGroups, UOWGroupType
 from calypte_api.types.validators import validate_type_id
 
 from fastapi import Depends
-from fastapi_pagination import Page
+from fastapi_pagination import Page, Params
 
 
 class IGroupService(ABC):
@@ -36,7 +36,10 @@ class IGroupService(ABC):
 
     @abstractmethod
     async def get_groups(
-        self, company_id: UUID, query_params: GetGroupQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: GroupFilter,
     ) -> Page[GetGroupResponse]:
         """
         Get all groups
@@ -104,23 +107,17 @@ class GroupService(IGroupService):
         return group_schema
 
     async def get_groups(
-        self, company_id: UUID, query_params: GetGroupQueryParams
+        self,
+        company_id: UUID,
+        pagination_params: Params,
+        filtration_params: GroupFilter,
     ) -> Page[GetGroupResponse]:
-        limit = query_params.size
-        offset = (query_params.page - 1) * query_params.size
-
         groups = await self.uow.group_repo.get_groups(
             company_id=company_id,
-            type_id=query_params.type_id,
-            offset=offset,
-            limit=limit,
-            name=query_params.name,
+            pagination_params=pagination_params,
+            filtration_params=filtration_params,
         )
-        return Page.create(
-            items=groups,
-            params=query_params,
-            total=query_params.size,
-        )
+        return groups
 
     async def create_group(
         self, company_id: UUID, request_body: CreateGroupRequestBody

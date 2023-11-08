@@ -2,6 +2,7 @@ from uuid import UUID
 
 from calypte_api.common.dependencies import (
     JwtClaims,
+    PaginationParamsType,
     RateLimiterType,
     check_permission,
 )
@@ -10,6 +11,7 @@ from calypte_api.devices import schemas as device_schemas
 from calypte_api.devices.service import DeviceServiceType
 
 from fastapi import APIRouter, Depends
+from fastapi_filter import FilterDepends
 from fastapi_pagination import Page
 
 
@@ -47,14 +49,16 @@ async def create_device(
 async def retrieve_devices(
     _: RateLimiterType,
     device_service: DeviceServiceType,
-    query_params: device_schemas.GetDeviceQueryParams = Depends(  # noqa B008
-        device_schemas.GetDeviceQueryParams
+    pagination_params: PaginationParamsType,
+    filtration_params: device_schemas.DeviceFilter = FilterDepends(
+        device_schemas.DeviceFilter
     ),
     jwt_claims: JwtClaims = Depends(check_permission(UserRole.USER)),  # noqa B008
 ) -> Page[device_schemas.GetDeviceResponse]:
     return await device_service.get_devices(
         company_id=jwt_claims.user.id,
-        query_params=query_params,
+        pagination_params=pagination_params,
+        filtration_params=filtration_params,
     )
 
 
