@@ -327,77 +327,227 @@ paths:
 
 components:
   schemas:
-    CreateDevice:
-      type: object
-    UpdateDevice:
-      type: object
-    Device:
-      type: object
-    DevicePage:
+    DeploymentDto:
       type: object
       properties:
-        pageCount:
-          type: number
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Device'
-    CreateTag:
-      type: object
-    UpdateTag:
-      type: object
-      properties:
+        id:
+          type: string
         name:
           type: string
-    Tag:
-      type: object
-    UploadFirmware:
-      type: object
-      properties:
-        file:
+        group:
+          $ref: '#/components/schemas/GroupDto'
+        firmware:
+          $ref: "#/components/schemas/FirmwareDto"
+        scheduledDate:
           type: string
-          format: binary
-    FirmwareInfo:
-      type: object
-    Error:
+        state:
+          $ref: '#/components/schemas/StatusDto'
+        completionDate:
+          type: string
+
+    DeploymentTaskDto:
       type: object
       properties:
-        statusCode:
-          type: number
+        id:
+          type: string
+        device:
+          $ref: '#/components/schemas/DeviceDto'
+        lastSeen:
+          type: string
+        state:
+          $ref: '#/components/schemas/StatusDto'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagDto'
+
+    StatusDto:
+      type: object
+      properties:
+        state:
+          enum:
+            - Done
+            - Pending
+            - Executed
+            - Error
+
+    RecordDto:
+      type: object
+      properties:
         message:
           type: string
 
+    DeviceDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        firmware:
+          type: object
+          $ref: '#/components/schemas/FirmwareDto'
+        lastSeen:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagDto'
+
+    TagDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+
+    GroupDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        firmware:
+          type: object
+          $ref: '#/components/schemas/FirmwareDto'
+        device:
+          $ref: '#/components/schemas/DeviceDto'
+        protocol:
+          type: string
+        sharedKey:
+          type: string
+
+    FirmwareDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        fileName:
+          type: string
+        created:
+          type: string
+        storageLink:
+          type: string
+
+
   requestBodies:
+    CreateDeploymentRequestBody:
+      description: create deployment request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              groupId:
+                type: string
+              firmwareId:
+                type: string
+              devices:
+                type: array
+                items:
+                  type: string
+              scheduled:
+                type: string
+
+    UpdateDeploymentRequestBody:
+      description: update deployment request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              scheduled:
+                type: string
+
+    CreateGroupRequestBody:
+      description: create group request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              protocol:
+                type: string
+
+    UpdateGroupRequestBody:
+      description: update group request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+
     CreateDeviceRequestBody:
-      description: Object that describes a creation of a new device
+      description: create device request body
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/CreateDevice'
+            type: object
+            properties:
+              name:
+                type: string
+              groupId:
+                type: string
+              serialNumber:
+                type: string
+              tags:
+                type: array
+                items:
+                  type: string
+
     UpdateDeviceRequestBody:
-      description: Object that describes an update of a existing device
+      description: update device request body
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UpdateDevice'
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              serialNumber:
+                type: string
+
     CreateTagRequestBody:
-      description: Object that describes a creation of a new tag
+      description: create tag request body
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/CreateTag'
+            type: object
+            properties:
+              name:
+                type: string
+              color:
+                type: string
+
     UpdateTagRequestBody:
-      description: Object that describes an update of a existing tag
+      description: update tag request body
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UpdateTag'
-    UploadFirmwareRequestBody:
-      description: Object that describes an upload of a firmware
-      content:
-        multipart/form-data:
-          schema:
-            $ref: '#/components/schemas/UploadFirmware'
+            type: object
+            properties:
+              name:
+                type: string
+              color:
+                type: string
 
   responses:
     CreateDeviceResponse:
