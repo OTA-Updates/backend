@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "backend/apps/calypte_api"
+		}
+	],
+	"settings": {
+		"ruff.enableExperimentalFormatter": true,
+		"ruff.enable": true,
+		"ruff.lint.run": "onSave",
+		"[python]": {
+			"editor.defaultFormatter": "charliermarsh.ruff",
+			"editor.formatOnSave": true,
+			"editor.codeActionsOnSave": {
+				"source.fixAll.ruff": "explicit",
+				"source.organizeImports.ruff": "explicit"
+			}
+		},
+		"cSpell.words": [
+			"aioredis",
+			"calypte",
+			"filebeat",
+			"filterset",
+			"MINIO",
+			"yasg"
+		]
+	}
+}
