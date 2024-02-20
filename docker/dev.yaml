@@ -1,35 +1,6 @@
 version: "3.8"
 
-include:
-  - elk.yaml
-
 services:
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: jaeger
-    restart: unless-stopped
-    ports:
-      - "6831:6831/udp"
-      - "16686:16686"
-
-  authDB:
-    image: postgres:15.3
-    container_name: auth_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: auth
-      POSTGRES_PASSWORD: auth
-      POSTGRES_DB: auth_db
-    ports:
-      - "5431:5432"
-    volumes:
-      - auth_db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U auth -d auth_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   calypteDB:
     image: postgres:15.3
     container_name: calypte_db
