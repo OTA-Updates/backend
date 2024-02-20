@@ -1,8 +1,12 @@
+from uuid import uuid4
+
 from django.db import models
 
 
 class UUIDAbstract(models.Model):
-    id: models.UUIDField = models.UUIDField(primary_key=True, editable=False)
+    id: models.UUIDField = models.UUIDField(
+        primary_key=True, editable=False, default=uuid4
+    )
 
     class Meta:
         abstract = True
