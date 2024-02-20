@@ -18,3 +18,6 @@ class Device(UUIDAbstract, TimeStampAbstract):  # type: ignore
     tags: models.ManyToManyField = models.ManyToManyField(
         Tag, blank=True, related_name="devices"
     )
+
+    def __str__(self) -> str:
+        return self.name
