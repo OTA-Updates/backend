@@ -16,7 +16,7 @@ tags:
     description: users
 paths:
   /api/v1/devices:
-    post:
+    post:  
       tags:
         - devices
       summary: Creates a new device
@@ -327,6 +327,7 @@ paths:
 
 components:
   schemas:
+    
     DeploymentDto:
       type: object
       properties:
@@ -414,8 +415,6 @@ components:
         firmware:
           type: object
           $ref: '#/components/schemas/FirmwareDto'
-        device:
-          $ref: '#/components/schemas/DeviceDto'
         protocol:
           type: string
         sharedKey:
@@ -464,9 +463,29 @@ components:
           schema:
             type: object
             properties:
-              id:
+              name:
                 type: string
               scheduled:
+                type: string
+    
+    DeleteDeploymentRequestBody:
+      description: delete deployment request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+    
+    DeleteDeploymentTaskRequestBody:
+      description: delete deployment task request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
                 type: string
 
     CreateGroupRequestBody:
@@ -488,9 +507,17 @@ components:
           schema:
             type: object
             properties:
-              id:
-                type: string
               name:
+                type: string
+    
+    DeleteGroupRequestBody:
+      description: delete group request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
                 type: string
 
     CreateDeviceRequestBody:
@@ -518,12 +545,14 @@ components:
           schema:
             type: object
             properties:
-              id:
-                type: string
               name:
                 type: string
               serialNumber:
                 type: string
+              tags:
+                type: array
+                items:
+                  type: string
 
     CreateTagRequestBody:
       description: create tag request body
@@ -532,6 +561,8 @@ components:
           schema:
             type: object
             properties:
+              group:
+                type: string
               name:
                 type: string
               color:
@@ -548,68 +579,121 @@ components:
                 type: string
               color:
                 type: string
+    
+    DeleteTagRequestBody:
+      description: delete tag request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+    
+    UploadFirmwareRequestBody:
+      description: upload firmware request body
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              version:
+                type: string
+              serialNumber:
+                type: string
+              group:
+                type: string
+              file:
+                type: array
+                items:
+                  type: string
+                  format: binary
+    
+    UpdateFirmwareRequestBody:
+      description: update firmware request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              version:
+                type: string
 
+    DeleteFirmwareRequestBody:
+      description: delete firmware request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+    
   responses:
     CreateDeviceResponse:
-      description:
+      description: Successfully created device
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Device'
+            $ref: '#/components/schemas/DeviceDto'
     DevicePageResponse:
-      description:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DevicePage'
-    UpdateDeviceResponse:
-      description:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Device'
-    GetDeviceByIdResponse:
-      description:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Device'
-    CreateTagResponse:
-      description:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Tag'
-    TagsResponse:
-      description:
+      description: List of devices
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Tag'
+              $ref: '#/components/schemas/DeviceDto'
+    UpdateDeviceResponse:
+      description: Successfully updated device
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceDto'
+    GetDeviceByIdResponse:
+      description: Successfully received device
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceDto'
+    CreateTagResponse:
+      description: Successfully created tag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TagDto'
+    TagsResponse:
+      description: List of tags
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TagDto'
     UpdateTagResponse:
-      description:
+      description: Successfully updated tag
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Tag'
+            $ref: '#/components/schemas/TagDto'
     GetTagByIdResponse:
-      description:
+      description: Successfully received tag
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Tag'
+            $ref: '#/components/schemas/TagDto'
     DownloadFirmwareResponse:
-      description:
+      description: Successfully downloaded firmware
       content:
         application/octet-stream:
           schema:
             type: string
             format: binary
     GetFirmwareInfoByIdResponse:
-      description:
-      content:
+      description:  Successfully received firmware info
+      content: 
         application/json:
           schema:
             $ref: '#/components/schemas/FirmwareInfo'
