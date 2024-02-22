@@ -13,7 +13,7 @@ class DeploymentSerializer(ModelSerializer):
     devices = serializers.ListField(write_only=True, required=True)
 
     # TODO: Implement get_state_display
-    def get_deployment_state(self, queryset: Deployment) -> str:
+    def get_state_display(self, queryset: Deployment) -> str:
         return "TODO: Implement get_state_display"
 
     # TODO: Implement validate_devices
