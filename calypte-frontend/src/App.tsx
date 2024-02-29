@@ -1,26 +1,44 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-function App() {
+const Registration = () => <div>Registration - Mail confirmation</div>;
+const Login = () => <div>Login</div>;
+const Dashboard = () => <div>Dashboard</div>;
+const Deployments = () => <div>Deployments</div>;
+const Deployment = () => <div>Deployment</div>;
+const Groups = () => <div>Groups</div>;
+const Group = () => <div>Group</div>;
+const Settings = () => <div>Settings</div>;
+const ChangeEmail = () => <div>Change Email</div>;
+const ChangePassword = () => <div>Change Password</div>;
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Navigate to='/dashboard' replace />} />
+        <Route path='/registration' element={<Registration />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/deployments' element={<Deployments />} />
+        <Route path='/deployments/new' element={<Deployment />} />
+        <Route path='/deployments/:id/edit' element={<Deployment />} />
+        <Route path='/deployments/:id/devicemanager' element={<Deployment />} />
+        <Route path='/deployments/:id/console' element={<Deployment />} />
+        <Route path='/groups' element={<Groups />} />
+        <Route path='/groups/new' element={<Group />} />
+        <Route path='/groups/:id/edit' element={<Group />} />
+        <Route path='/groups/:id/console' element={<Group />} />
+        <Route path='/groups/:id/device/new' element={<Group />} />
+        <Route path='/groups/:id/device/:deviceId/edit' element={<Group />} />
+        <Route path='/groups/:id/device/:deviceId/console' element={<Group />} />
+        <Route path='/settings' element={<Settings />} />
+        <Route path='/settings/changeemail' element={<ChangeEmail />} />
+        <Route path='/settings/changepassword' element={<ChangePassword />} />
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
+
 
 export default App;
