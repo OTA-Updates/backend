@@ -1,9 +1,10 @@
 from calypte_user.models import CalypteUser
+
 from factory import Faker
 from factory.django import DjangoModelFactory
 
 
-class TaskStatusFactory(DjangoModelFactory):
+class CalypteUserFactory(DjangoModelFactory):
     class Meta:
         model = CalypteUser
 

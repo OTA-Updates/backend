@@ -4,4 +4,6 @@ from django.contrib import admin
 
 
 # Register your models here.
-admin.site.register(TaskStatus)
+@admin.register(TaskStatus)
+class TaskStatusAdmin(admin.ModelAdmin):
+    list_display = ("id", "state", "created_at", "updated_at")

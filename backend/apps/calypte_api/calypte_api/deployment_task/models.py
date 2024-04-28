@@ -11,3 +11,6 @@ class DeploymentTask(UUIDAbstract, TimeStampAbstract):  # type: ignore
     )
     device: models.ForeignKey = models.ForeignKey(Device, on_delete=models.PROTECT)
     state: models.ForeignKey = models.ForeignKey(TaskStatus, on_delete=models.PROTECT)
+
+    def __str__(self) -> str:
+        return f"{self.deployment} - {self.device}"

@@ -2,5 +2,14 @@ from calypte_api.models import TimeStampAbstract, UUIDAbstract
 from django.db import models
 
 
+class ProtocolChoices(models.TextChoices):
+    mqtt = "mqtt", "MQTT"
+
+
 class Protocol(UUIDAbstract, TimeStampAbstract):  # type: ignore
-    name: models.CharField = models.CharField(max_length=255, unique=True)
+    name: models.CharField = models.CharField(
+        max_length=255, unique=True, choices=ProtocolChoices.choices
+    )
+
+    def __str__(self) -> str:
+        return self.name

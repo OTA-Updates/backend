@@ -14,3 +14,6 @@ class Deployment(UUIDAbstract, TimeStampAbstract):  # type: ignore
     completion_date: models.DateTimeField = models.DateTimeField(
         default=None, null=True
     )
+
+    def __str__(self) -> str:
+        return self.name
