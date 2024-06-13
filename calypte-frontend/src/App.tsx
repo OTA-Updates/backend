@@ -15,21 +15,44 @@ const Settings = () => <div>Settings</div>;
 const EmailConfirmation = () => <div>EmailConfirmation</div>;
 const ChangePassword = () => <div>Change Password</div>;
 
-
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <Routes>
-          <Route path='/registration' element={<AuthorizationLayout><Registration /></AuthorizationLayout>} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/email-confirmation' element={<EmailConfirmation />} />
+          <Route
+            path='/registration'
+            element={
+              <AuthorizationLayout>
+                <Registration />
+              </AuthorizationLayout>
+            }
+          />
+          <Route
+            path='/login'
+            element={
+              <AuthorizationLayout>
+                <Login />
+              </AuthorizationLayout>
+            }
+          />
+          <Route
+            path='/email-confirmation'
+            element={
+              <AuthorizationLayout>
+                <EmailConfirmation />
+              </AuthorizationLayout>
+            }
+          />
           <Route path='/' element={<Navigate to='/dashboard' replace />} />
-          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/dashboard' element={<AuthorizationLayout><Dashboard /></AuthorizationLayout>} />
           <Route path='/deployments' element={<Deployments />} />
           <Route path='/deployments/new' element={<Deployment />} />
           <Route path='/deployments/:id/edit' element={<Deployment />} />
-          <Route path='/deployments/:id/devicemanager' element={<Deployment />} />
+          <Route
+            path='/deployments/:id/devicemanager'
+            element={<Deployment />}
+          />
           <Route path='/deployments/:id/console' element={<Deployment />} />
           <Route path='/groups' element={<Groups />} />
           <Route path='/groups/new' element={<Group />} />
@@ -37,7 +60,10 @@ const App = () => {
           <Route path='/groups/:id/console' element={<Group />} />
           <Route path='/groups/:id/device/new' element={<Group />} />
           <Route path='/groups/:id/device/:deviceId/edit' element={<Group />} />
-          <Route path='/groups/:id/device/:deviceId/console' element={<Group />} />
+          <Route
+            path='/groups/:id/device/:deviceId/console'
+            element={<Group />}
+          />
           <Route path='/settings' element={<Settings />} />
           <Route path='/settings/changepassword' element={<ChangePassword />} />
         </Routes>
@@ -45,6 +71,5 @@ const App = () => {
     </ThemeProvider>
   );
 };
-
 
 export default App;

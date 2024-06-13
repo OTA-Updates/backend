@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import useStyles from './styles';
 
 interface ThemeContainerProps {
@@ -11,8 +11,11 @@ const AuthorizationLayout: React.FC<ThemeContainerProps> = ({ children }) => {
 
   return (
     <Box className={classes.root}>
-      <img src='' alt='Logo' className={classes.logo} />
-      {children}
+      <Box className={classes.header}>
+        <img src={`${process.env.PUBLIC_URL}/logo.svg`} alt='Logo' />
+        <Typography variant='h2'>Calypte</Typography>
+      </Box>
+      <Box className={classes.content}>{children}</Box>
     </Box>
   );
 };

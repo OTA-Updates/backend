@@ -2,6 +2,17 @@ import { createTheme } from '@mui/material/styles';
 
 // Create a custom theme
 const theme = createTheme({
+  typography: {
+    fontFamily: '"Montserrat", sans-serif',
+    allVariants: {
+      color: '#FFFFFF', 
+    },
+    h2: {
+      fontFamily: '"Montserrat", sans-serif',
+      fontWeight: 600,
+      fontSize: '18px'
+    },
+  },
   palette: {
     primary: {
       main: '#007bff', // Blue color
@@ -12,9 +23,6 @@ const theme = createTheme({
     background: {
       default: '#141419',
     },
-  },
-  typography: {
-    fontFamily: 'Roboto, sans-serif',
   },
 });
 
